@@ -2,742 +2,1537 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>付QQ的最终幻想</title>
-
-    <!-- Tailwind CSS -->
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Preline UI -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tailwind Config for Custom Colors -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        bgMain: '#FFFBF8',
-                        bgSec: '#FFCCB6',
-                        highlight: '#D8F878',
-                        wxGreen: '#95EC69',
-                    },
-                    fontFamily: {
-                        sans: ['"Noto Sans SC"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
-                    },
-                    animation: {
-                        'breathe': 'breathe 3s ease-in-out infinite',
-                        'ripple': 'ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite',
-                        'reveal': 'revealText 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
-                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-                    },
-                    keyframes: {
-                        breathe: {
-                            '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
-                            '50%': { opacity: '1', transform: 'scale(1.05)' },
-                        },
-                        ripple: {
-                            '0%': { transform: 'scale(0.9)', opacity: '1' },
-                            '100%': { transform: 'scale(2)', opacity: '0' },
-                        },
-                        revealText: {
-                            '0%': { opacity: '0', clipPath: 'inset(0 50% 0 50%)' },
-                            '100%': { opacity: '1', clipPath: 'inset(0 0 0 0)' },
-                        },
-                        shake: {
-                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
-                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
-                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
-                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
-                        },
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.0.0/dist/preline.min.js"></script>
+    
     <style>
-        /* 全局样式覆盖 */
-        body {
-            background-color: #FFFBF8;
+        :root {
+            --bg-primary: #FFFBF8;
+            --bg-secondary: #FFCCB6;
+            --accent: #D8F878;
+            --text-dark: #2D2D2D;
+            --text-light: #666666;
+            --wechat-green: #95EC69;
+            --wechat-white: #FFFFFF;
+            --gradient-warm: linear-gradient(135deg, #FFFBF8 0%, #FFCCB6 50%, #FFE4D6 100%);
+            --gradient-accent: linear-gradient(135deg, #D8F878 0%, #B8E848 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            overflow: hidden; /* 防止滚动，像APP一样 */
         }
-
-        /* 隐藏滚动条 */
-        .no-scrollbar::-webkit-scrollbar {
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+        }
+        
+        /* ===== 场景容器 ===== */
+        .scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            overflow: hidden;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        
+        .scene.active {
+            display: flex;
+            opacity: 1;
         }
-
-        /* 玻璃拟态 */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+        
+        /* ===== 登录页面 - PS5风格 ===== */
+        #login-scene {
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
         }
-
-        /* 微信对话气泡 */
-        .wx-bubble-left {
+        
+        .login-text {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: white;
+            letter-spacing: 0.3em;
+            opacity: 0;
+            text-shadow: 0 0 30px rgba(255,255,255,0.3);
+        }
+        
+        .avatar-container {
             position: relative;
+            width: 140px;
+            height: 140px;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .wx-bubble-left::before {
-            content: '';
-            position: absolute;
-            left: -6px;
-            top: 14px;
-            width: 0;
-            height: 0;
-            border-top: 6px solid transparent;
-            border-bottom: 6px solid transparent;
-            border-right: 6px solid white;
+        
+        .avatar-container:hover {
+            transform: scale(1.05);
         }
-        .wx-bubble-right {
-            position: relative;
+        
+        .avatar-container:active {
+            transform: scale(0.95);
         }
-        .wx-bubble-right::before {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 14px;
-            width: 0;
-            height: 0;
-            border-top: 6px solid transparent;
-            border-bottom: 6px solid transparent;
-            border-left: 6px solid #95EC69;
-        }
-
-        /* 登录页波纹特效 */
-        .login-ripple {
-            position: absolute;
+        
+        .avatar {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
+            object-fit: cover;
+            border: 3px solid rgba(255,255,255,0.2);
+            box-shadow: 0 0 40px rgba(216, 248, 120, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-glow {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent, var(--accent), transparent, var(--bg-secondary), transparent);
+            opacity: 0;
+            animation: none;
+        }
+        
+        @keyframes avatarGlow {
+            0% { transform: rotate(0deg); opacity: 0.8; }
+            100% { transform: rotate(360deg); opacity: 0.8; }
+        }
+        
+        .avatar-container.glowing .avatar-glow {
+            animation: avatarGlow 1.5s linear infinite;
+        }
+        
+        /* 波纹效果 */
+        .ripple {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(216,248,120,0.4) 0%, transparent 70%);
             transform: scale(0);
             pointer-events: none;
-            animation: loginRippleAnim 1s ease-out forwards;
         }
-
-        @keyframes loginRippleAnim {
-            to {
-                transform: scale(40); /* 覆盖整个屏幕 */
-                opacity: 0;
+        
+        @keyframes rippleExpand {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(20); opacity: 0; }
+        }
+        
+        .success-text {
+            font-size: 2rem;
+            font-weight: 300;
+            color: var(--accent);
+            letter-spacing: 0.2em;
+            opacity: 0;
+            text-shadow: 0 0 30px rgba(216, 248, 120, 0.5);
+        }
+        
+        /* ===== 主页 ===== */
+        #main-scene {
+            background: #000;
+            cursor: pointer;
+        }
+        
+        .main-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .start-hint {
+            position: absolute;
+            bottom: 15%;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 0.15em;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+            animation: breathe 2.5s ease-in-out infinite;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        
+        /* ===== 故事页面 ===== */
+        #story-scene {
+            background: var(--gradient-warm);
+            padding: 20px;
+        }
+        
+        .story-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .story-image-container {
+            width: 100%;
+            max-height: 45vh;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .story-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .story-image.visible {
+            opacity: 1;
+        }
+        
+        .story-text-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            min-height: 200px;
+        }
+        
+        .story-text {
+            font-size: 1.15rem;
+            line-height: 1.9;
+            color: var(--text-dark);
+            text-align: center;
+            min-height: 3em;
+        }
+        
+        .story-text .char {
+            opacity: 0;
+            display: inline-block;
+        }
+        
+        @keyframes charFadeIn {
+            0% { opacity: 0; transform: translateY(5px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes charFadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5) translateY(-10px); }
+        }
+        
+        .tap-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            opacity: 0.6;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* 选项按钮 */
+        .choices-container {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+        
+        .choice-btn {
+            padding: 16px 24px;
+            font-size: 1rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .choice-btn.choice-a {
+            background: linear-gradient(135deg, var(--accent) 0%, #C8E858 100%);
+            color: var(--text-dark);
+            box-shadow: 0 4px 15px rgba(216, 248, 120, 0.4);
+        }
+        
+        .choice-btn.choice-b {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #FFB8A0 100%);
+            color: var(--text-dark);
+            box-shadow: 0 4px 15px rgba(255, 204, 182, 0.4);
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+        
+        .choice-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* 页面震动 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shaking {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        /* 大号加粗文字 */
+        .story-text.bold-large {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        /* 气泡样式 */
+        .bubble {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .bubble:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+        
+        /* ===== 微信聊天页面 ===== */
+        #wechat-scene {
+            background: #EDEDED;
+        }
+        
+        .wechat-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #EDEDED;
+        }
+        
+        .wechat-header {
+            background: #EDEDED;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #D9D9D9;
+            position: relative;
+        }
+        
+        .wechat-header .back-btn {
+            position: absolute;
+            left: 15px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        
+        .wechat-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .wechat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: messageIn 0.4s ease forwards;
+        }
+        
+        @keyframes messageIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message-row.sent {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 1rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        
+        .message-row.received .message-bubble {
+            background: white;
+            color: #333;
+        }
+        
+        .message-row.sent .message-bubble {
+            background: var(--wechat-green);
+            color: #333;
+        }
+        
+        .message-bubble::before {
+            content: '';
+            position: absolute;
+        }
+        
+        .system-message {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #999;
+            padding: 5px 0;
+        }
+        
+        .wechat-choices {
+            padding: 15px;
+            background: #F7F7F7;
+            border-top: 1px solid #D9D9D9;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* ===== 结局页面 ===== */
+        #ending-scene {
+            background: #000;
+        }
+        
+        .ending-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .ending-image {
+            width: 100%;
+            max-height: 50vh;
+            object-fit: contain;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.8s ease;
+        }
+        
+        .ending-image.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .ending-text {
+            font-size: 1.2rem;
+            line-height: 2;
+            color: white;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .ending-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s ease;
+        }
+        
+        .birthday-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--bg-secondary), #FF9AA2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 20px;
+            opacity: 0;
+            animation: none;
+        }
+        
+        @keyframes birthdayPop {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* 礼花效果 */
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
             }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0.7;
+            }
+        }
+        
+        /* ===== 加载动画 ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--bg-secondary);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ===== 响应式调整 ===== */
+        @media (max-width: 380px) {
+            .story-text { font-size: 1rem; }
+            .choice-btn { padding: 14px 18px; font-size: 0.95rem; }
+            .login-text { font-size: 2rem; }
+        }
+        
+        @media (min-height: 800px) {
+            .story-image-container { max-height: 50vh; }
+        }
+        
+        /* 擦除动画 */
+        @keyframes wipeOut {
+            0% { clip-path: inset(0 0 0 0); }
+            100% { clip-path: inset(0 0 0 100%); }
+        }
+        
+        .wipe-out {
+            animation: wipeOut 0.6s ease forwards;
+        }
+        
+        /* 粒子消散效果 */
+        @keyframes particleFade {
+            0% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+                filter: blur(0);
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-30px) scale(0.3); 
+                filter: blur(4px);
+            }
+        }
+        
+        .particle-fade .char {
+            animation: particleFade 0.6s ease forwards;
+        }
+        
+        /* 微信撤回消息效果 */
+        .message-recalled {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+        
+        /* 选项按钮涟漪效果 */
+        .choice-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .choice-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* 故事页面图片加载动画 */
+        .story-image-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--bg-secondary);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            opacity: 0.5;
+            z-index: 1;
+        }
+        
+        .story-image-container:has(.story-image.visible)::before {
+            display: none;
+        }
+        
+        /* 结局页面背景渐变 */
+        #ending-scene {
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%);
+        }
+        
+        /* 生日标题闪烁效果 */
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(216, 248, 120, 0.5); }
+            50% { text-shadow: 0 0 40px rgba(216, 248, 120, 0.8), 0 0 60px rgba(255, 204, 182, 0.6); }
+        }
+        
+        .birthday-title.glowing {
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+        
+        /* 移动端触控反馈 */
+        @media (hover: none) {
+            .choice-btn:active {
+                transform: scale(0.95);
+                filter: brightness(0.95);
+            }
+            
+            .avatar-container:active {
+                transform: scale(0.9);
+            }
+        }
+        
+        /* 安全区域适配（iPhone刘海屏等） */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .wechat-header {
+                padding-top: calc(15px + env(safe-area-inset-top));
+            }
+            
+            .wechat-choices {
+                padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            }
+        }
+        
+        /* 深色模式下的微信样式 */
+        .wechat-container {
+            position: relative;
+        }
+        
+        /* 故事文字渐变效果 */
+        .story-text.highlight {
+            background: linear-gradient(135deg, var(--accent), var(--bg-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 气泡点击提示 */
+        .bubble::before {
+            content: '点击继续';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: var(--text-light);
+            opacity: 0.6;
+            white-space: nowrap;
         }
     </style>
 </head>
-
-<body x-data="gameData()" x-init="preloadImages()" class="text-gray-800 font-sans h-screen w-screen relative overflow-hidden selection:bg-highlight">
-
+<body>
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- 场景1: 登录页面 -->
+    <div class="scene active" id="login-scene">
+        <p class="login-text" id="login-text">请 登 录</p>
+        <div class="avatar-container" id="avatar-container" style="display: none;">
+            <div class="avatar-glow"></div>
+            <img src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/fqq-avtar.jpg" 
+                 alt="Avatar" class="avatar" id="avatar">
+        </div>
+        <p class="success-text" id="success-text">登 入 成 功</p>
+    </div>
+    
+    <!-- 场景2: 游戏主页 -->
+    <div class="scene" id="main-scene">
+        <img src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/mainpage.jpg" 
+             alt="Main" class="main-bg" loading="lazy">
+        <p class="start-hint">点击任意地方开始做梦</p>
+    </div>
+    
+    <!-- 场景3: 故事页面 -->
+    <div class="scene" id="story-scene">
+        <div class="story-container">
+            <div class="story-image-container">
+                <img src="" alt="" class="story-image" id="story-image">
+            </div>
+            <div class="story-text-area" id="story-text-area">
+                <p class="story-text" id="story-text"></p>
+                <div class="choices-container" id="choices-container"></div>
+                <span class="tap-hint" id="tap-hint"><i class="fas fa-hand-pointer"></i> 点击继续</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 场景4: 微信聊天 -->
+    <div class="scene" id="wechat-scene">
+        <div class="wechat-container">
+            <div class="wechat-header">
+                <i class="fas fa-chevron-left back-btn"></i>
+                <span class="wechat-title">导员CPU版</span>
+            </div>
+            <div class="wechat-messages" id="wechat-messages"></div>
+            <div class="wechat-choices" id="wechat-choices"></div>
+        </div>
+    </div>
+    
+    <!-- 场景5: 结局页面 -->
+    <div class="scene" id="ending-scene">
+        <div class="ending-container">
+            <img src="" alt="" class="ending-image" id="ending-image">
+            <div class="ending-text" id="ending-text"></div>
+            <h1 class="birthday-title" id="birthday-title">付QQ，生日快乐！</h1>
+        </div>
+    </div>
+    
     <!-- 背景音乐 -->
     <audio id="bgm" loop>
         <source src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/HappyBirthdaySong.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- 1. 登录页面 (仿PS5) -->
-    <section x-show="scene === 'login'" x-transition:leave="transition ease-in duration-1000" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-black text-white">
-
-        <div class="relative z-10 flex flex-col items-center">
-            <!-- 提示字 -->
-            <div x-show="!loginClicked" x-transition:enter="transition ease-out duration-1000" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="mb-8 text-xl font-light tracking-widest opacity-80 animate-pulse">
-                请登录
-            </div>
-
-            <!-- 头像容器 -->
-            <div @click="handleLogin($event)" class="relative group cursor-pointer transition-transform duration-300 hover:scale-110">
-                <!-- 呼吸光环 -->
-                <div class="absolute -inset-4 bg-white/20 rounded-full blur-xl animate-pulse group-hover:bg-highlight/40 transition-colors"></div>
-                <!-- 头像 -->
-                <img :src="imgUrl('fqq-avtar.jpg')" class="w-24 h-24 rounded-full border-2 border-white/50 object-cover relative z-10 shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                <!-- 边缘闪光 -->
-                <div x-show="loginClicked" class="absolute inset-0 rounded-full box-border border-4 border-white animate-ping"></div>
-            </div>
-
-            <div x-show="loginSuccess" x-transition:enter="transition ease-out duration-500 delay-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" class="mt-8 text-2xl font-bold tracking-widest text-highlight">
-                登入成功
-            </div>
-        </div>
-
-        <!-- 波纹容器 -->
-        <div id="ripple-container" class="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center"></div>
-    </section>
-
-    <!-- 2. 游戏主页 START SCREEN -->
-    <section x-show="scene === 'start'" class="absolute inset-0 z-40 bg-bgMain">
-        <!-- 背景图 -->
-        <div class="absolute inset-0">
-             <img :src="imgUrl('mainpage.jpg')" class="w-full h-full object-cover opacity-90">
-             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-        </div>
-
-        <!-- 呼吸文字 -->
-        <div @click="startGame()" class="absolute inset-x-0 bottom-1/4 h-32 flex items-center justify-center cursor-pointer z-50">
-            <p class="text-white text-lg tracking-[0.2em] font-light animate-breathe drop-shadow-md">
-                点击任意地方开始做梦
-            </p>
-        </div>
-    </section>
-
-    <!-- 3. VN 故事引擎 -->
-    <section x-show="isGameScene" class="absolute inset-0 z-30 bg-bgMain flex flex-col">
-
-        <!-- 顶部图片区域 (响应式高度) -->
-        <div class="relative flex-grow w-full overflow-hidden bg-gray-100 transition-all duration-700" :class="{'h-full': !dialogue.options, 'h-3/5': dialogue.options}">
-            <template x-if="dialogue.image">
-                <img :src="imgUrl(dialogue.image)"
-                     class="w-full h-full object-cover transition-opacity duration-1000"
-                     :class="shakeEffect ? 'animate-shake' : ''"
-                     alt="Scene Image">
-            </template>
-            <!-- 震动时的特效遮罩 -->
-            <div x-show="shakeEffect" class="absolute inset-0 bg-red-500/10 mix-blend-overlay"></div>
-        </div>
-
-        <!-- 底部对话框区域 -->
-        <div class="absolute bottom-0 left-0 right-0 p-6 pb-12 glass-panel rounded-t-3xl min-h-[30vh] flex flex-col justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-all duration-500">
-
-            <!-- 文字显示区 -->
-            <div @click="nextText()" class="flex-grow cursor-pointer" :class="{'pointer-events-none': dialogue.options}">
-                <!-- 名字 (可选) -->
-                <template x-if="dialogue.speaker">
-                    <div class="text-sm font-bold text-gray-400 mb-2 uppercase tracking-wide" x-text="dialogue.speaker"></div>
-                </template>
-
-                <!-- 对话内容 (带扩散特效) -->
-                <div class="relative min-h-[80px] flex items-center justify-center">
-                    <p :key="dialogue.text"
-                       class="text-xl md:text-2xl font-medium text-center leading-relaxed text-gray-800 animate-reveal w-full"
-                       :class="dialogue.isBig ? 'text-3xl font-black text-red-500' : ''"
-                       x-html="dialogue.text">
-                    </p>
-                </div>
-
-                <!-- 点击提示 -->
-                <div x-show="!dialogue.options" class="w-full flex justify-center mt-4 opacity-50 animate-bounce">
-                    <i class="fas fa-chevron-down text-gray-400"></i>
-                </div>
-            </div>
-
-            <!-- 选项区域 -->
-            <div x-show="dialogue.options" class="flex flex-col gap-3 mt-4 animate-fade-in-up">
-                <template x-for="(opt, index) in dialogue.options">
-                    <button @click="makeChoice(opt.next)"
-                            class="w-full py-4 px-6 bg-white/80 hover:bg-highlight border border-gray-100 rounded-xl shadow-sm text-left text-gray-800 font-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-95 flex items-center justify-between group">
-                        <span x-text="opt.text"></span>
-                        <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-gray-600"></i>
-                    </button>
-                </template>
-            </div>
-        </div>
-    </section>
-
-    <!-- 4. 微信聊天模拟器 -->
-    <section x-show="scene === 'wechat'" class="absolute inset-0 z-30 bg-[#EDEDED] flex flex-col">
-        <!-- 微信顶部 -->
-        <div class="bg-[#EDEDED] px-4 py-3 flex items-center justify-between border-b border-gray-300 shadow-sm z-10 pt-safe-top">
-            <div class="flex items-center gap-1 text-gray-800">
-                <i class="fas fa-chevron-left text-lg"></i>
-                <span class="text-lg">微信(1)</span>
-            </div>
-            <div class="font-semibold text-lg">钥匙老师 (CPU版)</div>
-            <i class="fas fa-ellipsis-h text-gray-800"></i>
-        </div>
-
-        <!-- 聊天内容区域 -->
-        <div class="flex-grow p-4 overflow-y-auto no-scrollbar flex flex-col gap-4" id="chat-container">
-            <template x-for="msg in chatHistory">
-                <!-- 消息行 -->
-                <div class="flex w-full mb-2 animate-fade-in-up" :class="msg.isMe ? 'flex-row-reverse' : 'flex-row'">
-                    <!-- 头像 -->
-                    <img :src="imgUrl(msg.isMe ? 'fqq-avtar.jpg' : 'img-left.jpg')" class="w-10 h-10 rounded-md shadow-sm border border-gray-200 object-cover flex-shrink-0">
-
-                    <!-- 气泡 -->
-                    <div class="max-w-[70%] text-[15px] leading-snug py-2 px-3 rounded-md shadow-sm mx-3 break-words relative"
-                         :class="msg.isMe ? 'bg-wxGreen text-black wx-bubble-right' : 'bg-white text-gray-800 wx-bubble-left'">
-                        <span x-text="msg.text"></span>
-                    </div>
-                </div>
-            </template>
-
-            <!-- 系统提示 (撤回等) -->
-            <template x-if="chatSystemMsg">
-                <div class="text-center text-xs text-gray-400 my-2 animate-pulse" x-text="chatSystemMsg"></div>
-            </template>
-        </div>
-
-        <!-- 聊天选项底栏 -->
-        <div class="p-4 bg-[#F7F7F7] border-t border-gray-300 pb-safe-bottom">
-            <template x-if="chatOptions">
-                <div class="flex flex-col gap-2">
-                    <template x-for="opt in chatOptions">
-                        <button @click="handleChatOption(opt)" class="w-full py-3 bg-white border border-gray-200 rounded-lg text-gray-800 font-medium shadow-sm active:bg-gray-100 transition-colors">
-                            <span x-text="opt.text"></span>
-                        </button>
-                    </template>
-                </div>
-            </template>
-            <template x-if="!chatOptions">
-                 <div class="h-12 bg-white rounded border border-gray-200 flex items-center px-4 text-gray-400 text-sm">
-                     <i class="fas fa-keyboard mr-2"></i> 对方正在输入...
-                 </div>
-            </template>
-        </div>
-    </section>
-
-    <!-- 5. 结局页面 -->
-    <section x-show="scene === 'ending'" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center text-center p-6 transition-colors duration-2000" :class="endingReveal ? 'bg-bgMain' : 'bg-black'">
-
-        <div x-show="!endingReveal" class="text-white opacity-80 animate-pulse">
-            ...
-        </div>
-
-        <div x-show="endingReveal" class="flex flex-col items-center w-full h-full justify-between py-10 animate-fade-in-up">
-            <!-- 顶部文案 -->
-            <div class="space-y-4 max-w-md mx-auto z-10">
-                 <template x-for="line in endingText">
-                     <p class="text-lg md:text-xl font-medium text-gray-800" x-text="line"></p>
-                 </template>
-                 <div class="pt-6">
-                     <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500 animate-pulse">
-                         付QQ，生日快乐！！！
-                     </h1>
-                 </div>
-            </div>
-
-            <!-- 底部大图 -->
-            <div class="relative w-full max-w-sm aspect-[3/4] mt-6 shadow-2xl rounded-2xl overflow-hidden transform rotate-2 border-4 border-white">
-                <img :src="imgUrl('FQQHappyBirthday.png')" class="w-full h-full object-cover">
-            </div>
-
-            <button @click="location.reload()" class="mt-8 px-8 py-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-black transition-all text-sm tracking-widest">
-                再做一次梦
-            </button>
-        </div>
-    </section>
-
     <script>
-        // GitHub CDN Base (使用 jsDelivr 加速国内访问)
+        // ===== 全局变量 =====
         const CDN_BASE = 'https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/';
-
-        // 处理URL编码的辅助函数
-        function getAssetUrl(filename) {
-            return CDN_BASE + encodeURIComponent(filename);
+        let currentScene = 'login';
+        let storyIndex = 0;
+        let currentPath = []; // 记录玩家选择路径
+        let canTap = false;
+        let isTyping = false;
+        let wechatChoice = ''; // 记录微信选项
+        
+        // 图片映射表（处理中文文件名）
+        const imageMap = {
+            'sleeping.png': 'sleeping.png',
+            '付QQ接电话无语.png': '%E4%BB%98QQ%E6%8E%A5%E7%94%B5%E8%AF%9D%E6%97%A0%E8%AF%AD.png',
+            '我骟QQ彻底怒了.png': '%E6%88%91%E9%AA%9FQQ%E5%BD%BB%E5%BA%95%E6%80%92%E4%BA%86.png',
+            '付QQ神威大发.png': '%E4%BB%98QQ%E7%A5%9E%E5%A8%81%E5%A4%A7%E5%8F%91.png',
+            '付QQ脚踩金钥.png': '%E4%BB%98QQ%E8%84%9A%E8%B8%A9%E9%87%91%E9%92%A5.png',
+            '付QQ战斗胜利结算画面.png': '%E4%BB%98QQ%E6%88%98%E6%96%97%E8%83%9C%E5%88%A9%E7%BB%93%E7%AE%97%E7%94%BB%E9%9D%A2.png',
+            '晕头转向电脑局.png': '%E6%99%95%E5%A4%B4%E8%BD%AC%E5%90%91%E7%94%B5%E8%84%91%E5%B1%80.png',
+            '躺在床上睁眼的付QQ.png': '%E8%BA%BA%E5%9C%A8%E5%BA%8A%E4%B8%8A%E7%9D%81%E7%9C%BC%E7%9A%84%E4%BB%98QQ.png',
+            'FQQHappyBirthday.png': 'FQQHappyBirthday.png',
+            'fqq-avtar.jpg': 'fqq-avtar.jpg',
+            'img-left.jpg': 'img-left.jpg',
+            'mainpage.jpg': 'mainpage.jpg'
+        };
+        
+        // ===== 故事脚本数据 =====
+        const storyData = {
+            // 开篇
+            'start': [
+                { image: 'sleeping.png', text: '你是付QQ，23英语2班的班长。' },
+                { text: 'AAA纯血正宗PPT大王AKA导员免费劳动力' },
+                { text: '现在是北京时间12月7日，早上8点20分\n你正在享受美好的周末', dissipate: true },
+                { text: '一阵强劲的音乐袭来！', bold: true, shake: true, wipeImage: true },
+                { text: '是你的QQ电话响了呢，你决定', smaller: true },
+                { 
+                    choices: [
+                        { text: 'A. 谁啊？接一下吧', goto: 'path_a1' },
+                        { text: 'B. 都衮，没人能阻止我睡觉', goto: 'ending_sleep' }
+                    ]
+                }
+            ],
+            
+            // A1路线 - 接电话
+            'path_a1': [
+                { image: '付QQ接电话无语.png', text: '「喂，老师。」' },
+                { text: '手机传来你导员的声音' },
+                { text: '「付QQ你现在做一个优秀班集体的PPT，下午4点前给我。」' },
+                { text: '………什么玩意儿？做PPT？你' },
+                {
+                    choices: [
+                        { text: 'A. 怒了，拒绝', goto: 'path_a2' },
+                        { text: 'B. 已老实，一会儿就去做', goto: 'path_b2' }
+                    ]
+                }
+            ],
+            
+            // A2路线 - 怒了
+            'path_a2': [
+                { image: '我骟QQ彻底怒了.png', text: '大早上做什么PPT？你彻底怒了' },
+                { text: '往日种种在眼前浮现，你忍无可忍，速速动手' },
+                { bubble: '「你不会做PPT吗？自己搞啊」' },
+                { text: '手机传来导员低沉的声音：「付QQ你怎么和老师说话的？」' },
+                {
+                    choices: [
+                        { text: 'A. 我现在就这个态度，不爱听别听', goto: 'path_a3' },
+                        { text: 'B. 对不起老师我刚刚没睡醒', goto: 'path_b2' }
+                    ]
+                }
+            ],
+            
+            // A3路线 - 继续硬刚
+            'path_a3': [
+                { text: '电话那头安静如鸡，随后是带着怒意的一声喊：「付QQ！」' },
+                { text: '你毫不示弱：「吼那么大声干嘛？现在是周末！我还在睡觉！」' },
+                { image: '付QQ神威大发.png', text: '导员：「你是班长，要有奉献精神！」' },
+                {
+                    choices: [
+                        { text: 'A. 奉献精神？那你给我发工资了吗？', goto: 'path_a4' },
+                        { text: 'B. 这班长谁爱当谁当，我不干了！', goto: 'path_b4' }
+                    ]
+                }
+            ],
+            
+            // A4路线 - 工资论
+            'path_a4': [
+                { text: '「你给我工资了吗要求这么多？我白干这么久还没找你算账呢！」' },
+                { text: '导员：「你怎么这么计较」' },
+                { image: '付QQ脚踩金钥.png', text: '你乘胜追击：「计较？那我们现在就算算，我干了多少活，你该给我多少钱？」' },
+                { text: '导员：「好了，你先休息」' },
+                { text: '「啪！」你直接挂了电话。' },
+                { image: '付QQ战斗胜利结算画面.png', text: '怼得你神清气爽，也不多啰嗦。' },
+                { goto: 'wechat' }
+            ],
+            
+            // B4路线 - 辞职论
+            'path_b4': [
+                { text: '「这班长谁爱当谁当！你现在就找别人，我立刻退出所有群！」' },
+                { text: '导员：「付QQ有话好好说」' },
+                { image: '付QQ脚踩金钥.png', text: '「没什么好说的，我受够了。再见。」' },
+                { text: '「啪！」你干脆利落地挂了电话。' },
+                { image: '付QQ战斗胜利结算画面.png', text: '怼得你神清气爽，也不多啰嗦。' },
+                { goto: 'wechat' }
+            ],
+            
+            // B2路线 - 老实做PPT
+            'path_b2': [
+                { image: '晕头转向电脑局.png', text: '你叹了口气：「好的老师，我尽快做」' },
+                { text: '挂了电话，你打开电脑开始收集材料' },
+                { text: '中午煮了火鸡面，你边吃边做' },
+                { text: '下午3点发到老师邮箱' },
+                { text: '老师回复：\'下次要更主动些\'' },
+                { text: '你苦笑一下，关掉电脑', clearImage: true },
+                { text: '躺回床上休息' },
+                { text: '盯着天花板发呆...' },
+                { goto: 'ending_reality' }
+            ],
+            
+            // 睡觉结局
+            'ending_sleep': [
+                { goto: 'ending_sleep_final' }
+            ]
+        };
+        
+        // 微信聊天数据
+        const wechatData = {
+            initial: [
+                { sender: 'teacher', text: '付QQ你怎么敢挂老师电话？' },
+                { sender: 'teacher', text: '太不像话了！' }
+            ],
+            choiceA5: [
+                { sender: 'me', text: '不像话的是你吧？周末早上八点打电话让人做PPT？' },
+                { sender: 'me', text: '你自己怎么不做？就知道使唤学生？' },
+                { sender: 'teacher', text: '你这样态度有问题，我要跟你家长谈谈！' },
+                { sender: 'me', text: '谈啊，说我在学校被当免费劳动力' },
+                { sender: 'me', text: '你打啊，现在就打' },
+                { type: 'wait', duration: 3000 },
+                { type: 'system', text: '…………' },
+                { type: 'system', text: '对方已撤回一条消息' },
+                { sender: 'teacher', text: '算了，你冷静一下。PPT我找别人做。' }
+            ],
+            choiceB5: [
+                { sender: 'teacher', text: '？' },
+                { sender: 'teacher', text: '付QQ，看到回复。' },
+                { type: 'system', text: '十分钟后' },
+                { sender: 'teacher', text: '行，你厉害。PPT不用你做了。' }
+            ]
+        };
+        
+        // ===== 工具函数 =====
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
-
-        function gameData() {
-            return {
-                scene: 'login', // login, start, game, wechat, ending
-                loginClicked: false,
-                loginSuccess: false,
-
-                // VN Logic variables
-                currentNodeId: 'start_sleep',
-                dialogue: {},
-                shakeEffect: false,
-                isGameScene: false, // Computed helper
-
-                // WeChat Logic variables
-                chatHistory: [],
-                chatOptions: null,
-                chatSystemMsg: null,
-
-                // Ending Logic
-                endingText: [],
-                endingReveal: false,
-                fromRoute: '', // 'sleep' or 'fight' or 'reality'
-
-                init() {
-                    // Watchers or Initializers can go here
-                    this.$watch('scene', (val) => {
-                        this.isGameScene = (val === 'game');
-                        if (val === 'ending') this.playEnding();
-                    });
-                },
-
-                imgUrl(filename) {
-                    return getAssetUrl(filename);
-                },
-
-                preloadImages() {
-                    // 简单预加载关键图片
-                    const images = ['fqq-avtar.jpg', 'mainpage.jpg', 'sleeping.png'];
-                    images.forEach(img => {
-                        const i = new Image();
-                        i.src = this.imgUrl(img);
-                    });
-                },
-
-                // 1. 登录逻辑
-                handleLogin(e) {
-                    if (this.loginClicked) return;
-                    this.loginClicked = true;
-
-                    // 创建波纹DOM
-                    const container = document.getElementById('ripple-container');
-                    const circle = document.createElement('div');
-                    circle.classList.add('login-ripple');
-                    // 简单居中处理，不需要计算鼠标位置了，因为是全屏动效
-                    container.appendChild(circle);
-
+        
+        function getImageUrl(filename) {
+            // 使用映射表获取编码后的文件名
+            const encodedName = imageMap[filename] || encodeURIComponent(filename);
+            return CDN_BASE + encodedName;
+        }
+        
+        // ===== 登录页面逻辑 =====
+        async function initLogin() {
+            const loginText = document.getElementById('login-text');
+            const avatarContainer = document.getElementById('avatar-container');
+            const successText = document.getElementById('success-text');
+            
+            // 隐藏加载
+            await sleep(800);
+            document.getElementById('loading').style.opacity = '0';
+            await sleep(500);
+            document.getElementById('loading').style.display = 'none';
+            
+            // 打字效果显示"请登录"
+            await sleep(500);
+            loginText.style.transition = 'opacity 1.5s ease';
+            loginText.style.opacity = '1';
+            
+            await sleep(2500);
+            loginText.style.opacity = '0';
+            
+            await sleep(1000);
+            loginText.style.display = 'none';
+            
+            // 显示头像
+            avatarContainer.style.display = 'block';
+            await sleep(100);
+            avatarContainer.style.opacity = '1';
+            avatarContainer.style.transform = 'scale(1)';
+            
+            // 点击头像事件
+            avatarContainer.onclick = handleAvatarClick;
+        }
+        
+        async function handleAvatarClick(e) {
+            const avatarContainer = document.getElementById('avatar-container');
+            const successText = document.getElementById('success-text');
+            
+            avatarContainer.onclick = null; // 防止重复点击
+            
+            // 发光效果
+            avatarContainer.classList.add('glowing');
+            
+            // 波纹效果
+            createRipple(e.clientX, e.clientY);
+            
+            await sleep(1200);
+            
+            // 头像消失
+            avatarContainer.style.opacity = '0';
+            avatarContainer.style.transform = 'scale(0.5)';
+            
+            await sleep(600);
+            avatarContainer.style.display = 'none';
+            
+            // 显示成功文字
+            successText.style.transition = 'opacity 0.8s ease';
+            successText.style.opacity = '1';
+            
+            await sleep(1500);
+            successText.style.opacity = '0';
+            
+            await sleep(800);
+            
+            // 切换到主页
+            switchScene('main');
+        }
+        
+        function createRipple(x, y) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.width = '100px';
+            ripple.style.height = '100px';
+            ripple.style.marginLeft = '-50px';
+            ripple.style.marginTop = '-50px';
+            ripple.style.animation = 'rippleExpand 1.2s ease-out forwards';
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 1200);
+        }
+        
+        // ===== 场景切换 =====
+        function switchScene(sceneName) {
+            const scenes = document.querySelectorAll('.scene');
+            scenes.forEach(scene => {
+                scene.classList.remove('active');
+                scene.style.opacity = '0';
+            });
+            
+            setTimeout(() => {
+                const newScene = document.getElementById(sceneName + '-scene');
+                if (newScene) {
+                    newScene.classList.add('active');
                     setTimeout(() => {
-                        this.loginSuccess = true;
-                        setTimeout(() => {
-                            this.scene = 'start';
-                        }, 1500);
-                    }, 1000);
-                },
-
-                // 2. 开始游戏
-                startGame() {
-                    // 尝试播放音乐 (需要用户交互)
-                    const bgm = document.getElementById('bgm');
-                    bgm.volume = 0.3;
-                    // 这里暂时不播放，等到生日快乐再放，或者现在放背景音
-                    // bgm.play().catch(e => console.log("Audio autoplay blocked"));
-
-                    this.scene = 'game';
-                    this.loadScene('start_sleep');
-                },
-
-                // 3. VN 引擎核心
-                loadScene(nodeId) {
-                    this.currentNodeId = nodeId;
-                    const node = this.storyNodes[nodeId];
-
-                    if (!node) { console.error('Node not found:', nodeId); return; }
-
-                    // 如果是特殊指令：跳转到微信或结局
-                    if (node.type === 'switch_wechat') {
-                        this.scene = 'wechat';
-                        this.initWeChat();
-                        return;
-                    }
-                    if (node.type === 'ending') {
-                        this.fromRoute = node.route;
-                        this.scene = 'ending';
-                        return;
-                    }
-
-                    // 设置当前对话状态
-                    this.dialogue = {
-                        text: node.text,
-                        image: node.image,
-                        speaker: node.speaker || '',
-                        options: node.options || null,
-                        isBig: node.effect === 'big',
-                        next: node.next || null
-                    };
-
-                    // 处理特效
-                    if (node.effect === 'shake') {
-                        this.shakeEffect = true;
-                        if (navigator.vibrate) navigator.vibrate(200);
-                        setTimeout(() => this.shakeEffect = false, 500);
-                    }
-                },
-
-                nextText() {
-                    // 如果有选项，必须点选项
-                    if (this.dialogue.options) return;
-                    // 如果有下一句，加载下一句
-                    if (this.dialogue.next) {
-                        this.loadScene(this.dialogue.next);
-                    }
-                },
-
-                makeChoice(nextNodeId) {
-                    this.loadScene(nextNodeId);
-                },
-
-                // 4. 微信逻辑
-                async initWeChat() {
-                    this.chatHistory = [];
-                    // 初始对话
-                    await this.delay(1000);
-                    this.addChatMsg('keys', '付QQ你怎么敢挂老师电话？');
-                    await this.delay(800);
-                    this.addChatMsg('keys', '太不像话了！');
-                    await this.delay(500);
-
-                    this.chatOptions = [
-                        { text: 'A. （继续输出）我就这样，怎么着？', next: 'chat_A' },
-                        { text: 'B. （无视）已读不回', next: 'chat_B' }
-                    ];
-                },
-
-                addChatMsg(who, text) {
-                    this.chatHistory.push({
-                        isMe: who === 'me',
-                        text: text
-                    });
-                    // 滚动到底部
-                    this.$nextTick(() => {
-                        const container = document.getElementById('chat-container');
-                        container.scrollTop = container.scrollHeight;
-                    });
-                },
-
-                async handleChatOption(opt) {
-                    this.chatOptions = null; // 隐藏选项
-
-                    if (opt.next === 'chat_A') {
-                        this.addChatMsg('me', '不像话的是你吧？周末早上八点打电话让人做PPT？');
-                        await this.delay(1000);
-                        this.addChatMsg('me', '你自己怎么不做？就知道使唤学生？');
-                        await this.delay(1500);
-                        this.addChatMsg('keys', '你这样态度有问题，我要跟你家长谈谈！');
-                        await this.delay(1000);
-                        this.addChatMsg('me', '谈啊，说我在学校被当免费劳动力');
-                        await this.delay(800);
-                        this.addChatMsg('me', '你打啊，现在就打');
-                        await this.delay(2000);
-                        this.chatSystemMsg = '"钥匙老师" 撤回了一条消息';
-                        await this.delay(1000);
-                        this.addChatMsg('keys', '算了，你冷静一下。PPT我找别人做。');
-                        await this.delay(2000);
-                        this.fromRoute = 'fight';
-                        this.scene = 'ending';
-                    } else {
-                        await this.delay(1000);
-                        this.addChatMsg('keys', '？');
-                        await this.delay(1000);
-                        this.addChatMsg('keys', '付QQ，看到回复。');
-                        await this.delay(2000); // 模拟10分钟
-                        this.chatSystemMsg = '10分钟后';
-                        await this.delay(1000);
-                        this.addChatMsg('keys', '行，你厉害。PPT不用你做了。');
-                        await this.delay(2000);
-                        this.fromRoute = 'fight';
-                        this.scene = 'ending';
-                    }
-                },
-
-                delay(ms) {
-                    return new Promise(resolve => setTimeout(resolve, ms));
-                },
-
-                // 5. 结局逻辑
-                playEnding() {
-                    // 播放音乐
-                    const bgm = document.getElementById('bgm');
-                    bgm.play().catch(e => console.log('Interact first'));
-
-                    // 准备文案
-                    if (this.fromRoute === 'fight') {
-                        // 猛人线
-                        this.endingText = [
-                             "你猛地睁开眼睛。",
-                             "阳光从窗帘缝隙洒进来，宿舍里安安静静。",
-                             "原来……是一场梦啊。",
-                             "但不得不说，骂得真爽。",
-                             "虽然梦是假的，但爽是真的。",
-                             "今天是12月7日——"
-                        ];
-                    } else if (this.fromRoute === 'sleep') {
-                        // 睡到自然醒
-                        this.endingText = [
-                            "你舒服地翻了个身，沉沉睡去。",
-                            "再次醒来，已经是中午。",
-                            "阳光明媚，周末大好。",
-                            "没有电话，没有PPT，只有惬意的休息。",
-                            "今天是12月7日——"
-                        ];
-                    } else {
-                        // 现实线 (bad ending)
-                        this.endingText = [
-                            "你盯着熟悉的帘子。",
-                            "手机安静地躺在枕边。",
-                            "没有电话，没有PPT。",
-                            "原来……是一场梦啊。",
-                            "虽然在梦里也被CPU了，但那都是假的。",
-                            "嘿，今天是你生日，开心一点吧。"
-                        ];
-                    }
-
-                    // 动画流程
-                    setTimeout(() => {
-                        this.endingReveal = true;
-                        this.fireConfetti();
-                    }, 2000);
-                },
-
-                fireConfetti() {
-                    var duration = 15 * 1000;
-                    var animationEnd = Date.now() + duration;
-                    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
-
-                    var interval = setInterval(function() {
-                        var timeLeft = animationEnd - Date.now();
-
-                        if (timeLeft <= 0) {
-                            return clearInterval(interval);
-                        }
-
-                        var particleCount = 50 * (timeLeft / duration);
-                        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                    }, 250);
-                },
-
-                // 数据结构：剧情节点
-                storyNodes: {
-                    'start_sleep': {
-                        image: 'sleeping.png',
-                        text: '你是付QQ，23英语2班的班长。',
-                        next: 'intro_2'
-                    },
-                    'intro_2': {
-                        image: 'sleeping.png',
-                        text: 'AAA纯血正宗PPT大王AKA导员免费劳动力',
-                        next: 'intro_3'
-                    },
-                    'intro_3': {
-                        image: 'sleeping.png',
-                        text: '现在是北京时间12月7日，早上8点20分<br>你正在享受美好的周末',
-                        next: 'alarm_shock'
-                    },
-                    'alarm_shock': {
-                        image: 'sleeping.png', // Or shake screen
-                        text: '一阵强劲的音乐袭来！',
-                        effect: 'big',
-                        next: 'call_choice'
-                    },
-                    'call_choice': {
-                        image: 'sleeping.png',
-                        text: '是你的QQ电话响了呢，你决定',
-                        options: [
-                            { text: 'A. 谁啊？接一下吧', next: 'pickup_phone' },
-                            { text: 'B. 都衮，没人能阻止我睡觉', next: 'end_sleep' }
-                        ]
-                    },
-                    // 分支：睡觉结局
-                    'end_sleep': {
-                        type: 'ending',
-                        route: 'sleep'
-                    },
-                    // 分支：接电话
-                    'pickup_phone': {
-                        image: '付QQ接电话无语.png',
-                        text: '「喂，老师。」<br>手机传来你导员的声音',
-                        next: 'cpu_task'
-                    },
-                    'cpu_task': {
-                        image: '付QQ接电话无语.png',
-                        text: '「付QQ你现在做一个优秀班集体的PPT，下午4点前给我。」',
-                        next: 'reaction_choice'
-                    },
-                    'reaction_choice': {
-                        image: '付QQ接电话无语.png',
-                        text: '………什么玩意儿？做PPT？你...',
-                        options: [
-                            { text: 'A. 怒了，拒绝', next: 'angry_mode' },
-                            { text: 'B. 已老实，一会儿就去做', next: 'submissive_mode' }
-                        ]
-                    },
-                    // 分支：老实人
-                    'submissive_mode': {
-                        image: '付QQ接电话无语.png',
-                        text: '你叹了口气：「好的老师，我尽快做」',
-                        next: 'working_hard'
-                    },
-                    'working_hard': {
-                        image: '晕头转向电脑局.png',
-                        text: '挂了电话，你打开电脑开始收集材料。<br>中午煮了火鸡面，你边吃边做。',
-                        next: 'work_feedback'
-                    },
-                    'work_feedback': {
-                        image: '晕头转向电脑局.png',
-                        text: '下午3点发到老师邮箱。<br>老师回复：‘下次要更主动些’',
-                        next: 'end_reality_pre'
-                    },
-                    'end_reality_pre': {
-                        image: '晕头转向电脑局.png', // Should fade to black ideally
-                        text: '你苦笑一下，关掉电脑。躺回床上休息，盯着天花板发呆...',
-                        next: 'end_reality'
-                    },
-                    'end_reality': {
-                        type: 'ending',
-                        route: 'reality'
-                    },
-                    // 分支：怒了
-                    'angry_mode': {
-                        image: '我骟QQ彻底怒了.png',
-                        text: '大早上做什么PPT？你彻底怒了。<br>往日种种在眼前浮现，你忍无可忍，速速动手',
-                        next: 'bubble_preclick'
-                    },
-                    'bubble_preclick': {
-                        image: '我骟QQ彻底怒了.png',
-                        text: '「你不会做PPT吗？自己搞啊」', // 这里简化点击逻辑，直接当文本展示
-                        effect: 'big',
-                        next: 'teacher_shocked'
-                    },
-                    'teacher_shocked': {
-                        image: '我骟QQ彻底怒了.png',
-                        text: '手机传来导员低沉的声音：「付QQ你怎么和老师说话的？」',
-                        options: [
-                            { text: 'A. 我现在就这个态度，不爱听别听', next: 'fight_attitude' },
-                            { text: 'B. 对不起老师我刚刚没睡醒', next: 'submissive_mode' } // 回到老实人线
-                        ]
-                    },
-                    'fight_attitude': {
-                        image: '我骟QQ彻底怒了.png',
-                        text: '电话那头安静如鸡，随后是带着怒意的一声喊：「付QQ！」<br>你毫不示弱：「吼那么大声干嘛？现在是周末！我还在睡觉！」',
-                        next: 'shenwei'
-                    },
-                    'shenwei': {
-                        image: '付QQ神威大发.png',
-                        text: '导员：「你是班长，要有奉献精神！」',
-                        options: [
-                            { text: 'A. 奉献精神？那你给我发工资了吗？', next: 'salary_talk' },
-                            { text: 'B. 这班长谁爱当谁当，我不干了！', next: 'quit_talk' }
-                        ]
-                    },
-                    'salary_talk': {
-                        image: '付QQ脚踩金钥.png',
-                        text: '「你给我工资了吗要求这么多？我白干这么久还没找你算账呢！」<br>导员：「你怎么这么计较」',
-                        next: 'salary_calc'
-                    },
-                    'salary_calc': {
-                        image: '付QQ脚踩金钥.png',
-                        text: '你乘胜追击：「计较？那我们现在就算算，我干了多少活，你该给我多少钱？」<br>导员：「好了，你先休息」',
-                        next: 'hang_up_win'
-                    },
-                    'quit_talk': {
-                        image: '付QQ脚踩金钥.png',
-                        text: '「这班长谁爱当谁当！你现在就找别人，我立刻退出所有群！」<br>导员：「付QQ有话好好说」',
-                        next: 'hang_up_win_2'
-                    },
-                    'hang_up_win': {
-                        image: '付QQ战斗胜利结算画面.png',
-                        text: '「啪！」你直接挂了电话。<br>怼得你神清气爽，也不多啰嗦。',
-                        type: 'switch_wechat'
-                    },
-                    'hang_up_win_2': { // Quit talk branch
-                        image: '付QQ战斗胜利结算画面.png',
-                        text: '「没什么好说的，我受够了。再见。」<br>「啪！」你干脆利落地挂了电话。<br>怼得你神清气爽。',
-                        type: 'switch_wechat'
-                    }
+                        newScene.style.opacity = '1';
+                    }, 50);
+                    
+                    // 初始化对应场景
+                    if (sceneName === 'main') initMainScene();
+                    else if (sceneName === 'story') initStoryScene('start');
+                    else if (sceneName === 'wechat') initWechatScene();
+                    else if (sceneName === 'ending') initEndingScene();
+                }
+            }, 300);
+            
+            currentScene = sceneName;
+        }
+        
+        // ===== 主页逻辑 =====
+        function initMainScene() {
+            const mainScene = document.getElementById('main-scene');
+            mainScene.onclick = () => {
+                mainScene.onclick = null;
+                switchScene('story');
+            };
+        }
+        
+        // ===== 故事页面逻辑 =====
+        let currentStoryPath = 'start';
+        
+        function initStoryScene(path) {
+            currentStoryPath = path;
+            storyIndex = 0;
+            showStoryStep();
+        }
+        
+        async function showStoryStep() {
+            const story = storyData[currentStoryPath];
+            if (!story || storyIndex >= story.length) return;
+            
+            const step = story[storyIndex];
+            const storyImage = document.getElementById('story-image');
+            const storyText = document.getElementById('story-text');
+            const choicesContainer = document.getElementById('choices-container');
+            const tapHint = document.getElementById('tap-hint');
+            const storyScene = document.getElementById('story-scene');
+            
+            canTap = false;
+            choicesContainer.style.display = 'none';
+            tapHint.style.display = 'none';
+            
+            // 处理跳转
+            if (step.goto) {
+                if (step.goto === 'wechat') {
+                    await sleep(500);
+                    switchScene('wechat');
+                    return;
+                } else if (step.goto === 'ending_reality') {
+                    currentPath.push('reality');
+                    await sleep(500);
+                    switchScene('ending');
+                    return;
+                } else if (step.goto === 'ending_sleep_final') {
+                    currentPath.push('sleep');
+                    await sleep(500);
+                    switchScene('ending');
+                    return;
+                } else {
+                    currentStoryPath = step.goto;
+                    storyIndex = 0;
+                    showStoryStep();
+                    return;
                 }
             }
+            
+            // 处理图片
+            if (step.image) {
+                storyImage.src = getImageUrl(step.image);
+                storyImage.classList.add('visible');
+            }
+            
+            if (step.wipeImage) {
+                storyImage.classList.add('wipe-out');
+                await sleep(600);
+                storyImage.classList.remove('visible', 'wipe-out');
+                storyImage.src = '';
+            }
+            
+            if (step.clearImage) {
+                storyImage.classList.remove('visible');
+                await sleep(300);
+                storyImage.src = '';
+            }
+            
+            // 处理震动
+            if (step.shake) {
+                storyScene.classList.add('shaking');
+                setTimeout(() => storyScene.classList.remove('shaking'), 500);
+            }
+            
+            // 处理文字样式
+            if (step.bold) {
+                storyText.classList.add('bold-large');
+            } else {
+                storyText.classList.remove('bold-large');
+            }
+            
+            // 处理选项
+            if (step.choices) {
+                await typeText(storyText, story[storyIndex - 1]?.text || '', false);
+                showChoices(step.choices);
+                return;
+            }
+            
+            // 处理气泡
+            if (step.bubble) {
+                await showBubble(step.bubble);
+                storyIndex++;
+                showStoryStep();
+                return;
+            }
+            
+            // 显示文字
+            if (step.text) {
+                await typeText(storyText, step.text, step.dissipate);
+            }
+            
+            // 显示点击提示
+            tapHint.style.display = 'block';
+            canTap = true;
         }
-
-        // Helper for confetti
-        function randomInRange(min, max) {
-            return Math.random() * (max - min) + min;
+        
+        async function typeText(element, text, dissipate = false) {
+            isTyping = true;
+            element.innerHTML = '';
+            
+            const chars = text.split('');
+            for (let i = 0; i < chars.length; i++) {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = chars[i] === '\n' ? '' : chars[i];
+                if (chars[i] === '\n') {
+                    element.appendChild(document.createElement('br'));
+                } else {
+                    element.appendChild(span);
+                }
+                
+                // 从中间向两边扩散的效果
+                const delay = Math.abs(i - chars.length / 2) * 30;
+                setTimeout(() => {
+                    span.style.animation = 'charFadeIn 0.3s ease forwards';
+                }, delay);
+            }
+            
+            await sleep(chars.length * 30 + 500);
+            isTyping = false;
+            
+            if (dissipate) {
+                await sleep(1500);
+                const spans = element.querySelectorAll('.char');
+                spans.forEach((span, i) => {
+                    setTimeout(() => {
+                        span.style.animation = 'charFadeOut 0.4s ease forwards';
+                    }, i * 20);
+                });
+                await sleep(spans.length * 20 + 400);
+            }
         }
+        
+        function showChoices(choices) {
+            const container = document.getElementById('choices-container');
+            container.innerHTML = '';
+            container.style.display = 'flex';
+            
+            choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = `choice-btn ${index === 0 ? 'choice-a' : 'choice-b'}`;
+                btn.textContent = choice.text;
+                btn.style.opacity = '0';
+                btn.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    btn.style.transition = 'all 0.4s ease';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'translateY(0)';
+                }, index * 150);
+                
+                btn.onclick = () => {
+                    currentPath.push(choice.goto);
+                    currentStoryPath = choice.goto;
+                    storyIndex = 0;
+                    container.style.display = 'none';
+                    showStoryStep();
+                };
+                
+                container.appendChild(btn);
+            });
+        }
+        
+        async function showBubble(text) {
+            const storyText = document.getElementById('story-text');
+            storyText.innerHTML = '';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = text;
+            bubble.style.opacity = '0';
+            bubble.style.transform = 'scale(0.9)';
+            storyText.appendChild(bubble);
+            
+            await sleep(100);
+            bubble.style.transition = 'all 0.4s ease';
+            bubble.style.opacity = '1';
+            bubble.style.transform = 'scale(1)';
+            
+            return new Promise(resolve => {
+                bubble.onclick = () => {
+                    bubble.style.opacity = '0';
+                    bubble.style.transform = 'scale(0.9)';
+                    setTimeout(resolve, 400);
+                };
+            });
+        }
+        
+        // 故事页面点击事件
+        document.getElementById('story-scene').addEventListener('click', (e) => {
+            if (!canTap || isTyping) return;
+            if (e.target.closest('.choice-btn') || e.target.closest('.bubble')) return;
+            
+            storyIndex++;
+            showStoryStep();
+        });
+        
+        // ===== 微信页面逻辑 =====
+        async function initWechatScene() {
+            const messagesContainer = document.getElementById('wechat-messages');
+            const choicesContainer = document.getElementById('wechat-choices');
+            messagesContainer.innerHTML = '';
+            
+            // 显示初始消息
+            for (const msg of wechatData.initial) {
+                await addWechatMessage(msg);
+                await sleep(800);
+            }
+            
+            // 显示选项
+            await sleep(500);
+            showWechatChoices();
+        }
+        
+        async function addWechatMessage(msg) {
+            const container = document.getElementById('wechat-messages');
+            
+            if (msg.type === 'system') {
+                const div = document.createElement('div');
+                div.className = 'system-message';
+                div.textContent = msg.text;
+                div.style.animationDelay = '0.1s';
+                container.appendChild(div);
+                return;
+            }
+            
+            if (msg.type === 'wait') {
+                await sleep(msg.duration);
+                return;
+            }
+            
+            const row = document.createElement('div');
+            row.className = `message-row ${msg.sender === 'me' ? 'sent' : 'received'}`;
+            
+            const avatar = document.createElement('img');
+            avatar.className = 'message-avatar';
+            avatar.src = msg.sender === 'me' 
+                ? getImageUrl('fqq-avtar.jpg')
+                : getImageUrl('img-left.jpg');
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = msg.text;
+            
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            container.appendChild(row);
+            
+            // 滚动到底部
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function showWechatChoices() {
+            const container = document.getElementById('wechat-choices');
+            container.innerHTML = '';
+            container.style.display = 'flex';
+            
+            const choices = [
+                { text: 'A. （继续输出）我就这样，怎么着？', action: 'A5' },
+                { text: 'B. （无视）已读不回', action: 'B5' }
+            ];
+            
+            choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = `choice-btn ${index === 0 ? 'choice-a' : 'choice-b'}`;
+                btn.textContent = choice.text;
+                btn.onclick = () => handleWechatChoice(choice.action);
+                container.appendChild(btn);
+            });
+        }
+        
+        async function handleWechatChoice(action) {
+            const choicesContainer = document.getElementById('wechat-choices');
+            choicesContainer.style.display = 'none';
+            
+            currentPath.push(action);
+            wechatChoice = action;
+            
+            const messages = action === 'A5' ? wechatData.choiceA5 : wechatData.choiceB5;
+            
+            for (const msg of messages) {
+                await addWechatMessage(msg);
+                if (msg.type === 'wait') {
+                    // wait类型已在addWechatMessage中处理
+                } else {
+                    await sleep(1200);
+                }
+            }
+            
+            await sleep(2500);
+            currentPath.push('winner');
+            switchScene('ending');
+        }
+        
+        // ===== 结局页面逻辑 =====
+        async function initEndingScene() {
+            const endingImage = document.getElementById('ending-image');
+            const endingText = document.getElementById('ending-text');
+            const birthdayTitle = document.getElementById('birthday-title');
+            const bgm = document.getElementById('bgm');
+            const endingScene = document.getElementById('ending-scene');
+            
+            endingImage.classList.remove('visible');
+            endingText.classList.remove('visible');
+            birthdayTitle.style.animation = 'none';
+            birthdayTitle.style.opacity = '0';
+            endingText.textContent = '';
+            
+            // 黑屏渐亮
+            await sleep(1000);
+            
+            let texts = [];
+            
+            // 根据路径决定结局文本
+            if (currentPath.includes('ending_sleep')) {
+                // 睡觉结局 - B1分支
+                texts = [
+                    '你舒服地翻了个身，沉沉睡去。',
+                    '再次醒来，已经是中午。',
+                    '阳光明媚，周末大好。',
+                    '没有电话，没有PPT，只有惬意的休息。'
+                ];
+            } else if (currentPath.includes('reality') || currentPath.includes('path_b2')) {
+                // 现实结局 - B2/B3分支
+                endingImage.src = getImageUrl('躺在床上睁眼的付QQ.png');
+                endingImage.classList.add('visible');
+                await sleep(800);
+                
+                texts = [
+                    '你盯着熟悉的帘子。',
+                    '手机安静地躺在枕边。',
+                    '没有电话，没有PPT。',
+                    '原来……是一场梦啊。',
+                    '虽然在梦里也被CPU了，但那都是假的。'
+                ];
+            } else {
+                // 猛人胜利结局 - A线全通关
+                endingImage.src = getImageUrl('躺在床上睁眼的付QQ.png');
+                endingImage.classList.add('visible');
+                await sleep(800);
+                
+                texts = [
+                    '你猛地睁开眼睛。',
+                    '阳光从窗帘缝隙洒进来，宿舍里安安静静。',
+                    '原来……是一场梦啊。',
+                    '但不得不说，骂得真爽。'
+                ];
+            }
+            
+            // 逐行显示文字
+            for (const text of texts) {
+                endingText.textContent = text;
+                endingText.classList.add('visible');
+                await sleep(2500);
+                endingText.classList.remove('visible');
+                await sleep(400);
+            }
+            
+            // 礼花效果
+            startConfetti();
+            
+            // 播放音乐
+            try {
+                bgm.volume = 0.6;
+                await bgm.play();
+            } catch(e) {
+                console.log('Audio autoplay blocked, user interaction required');
+            }
+            
+            // 最终祝福
+            await sleep(600);
+            
+            if (currentPath.includes('reality') || currentPath.includes('path_b2')) {
+                endingText.textContent = '嘿，今天是你生日，开心一点吧。';
+            } else {
+                endingText.textContent = '虽然梦是假的，但爽是真的。';
+            }
+            endingText.classList.add('visible');
+            
+            await sleep(2500);
+            endingText.textContent = '今天是12月7日——';
+            
+            await sleep(2000);
+            
+            // 切换到生日祝福
+            endingText.classList.remove('visible');
+            await sleep(300);
+            
+            // 显示生日图片和标题
+            endingImage.src = getImageUrl('FQQHappyBirthday.png');
+            endingImage.classList.add('visible');
+            
+            await sleep(600);
+            birthdayTitle.textContent = '付QQ，生日快乐！！！';
+            birthdayTitle.style.animation = 'birthdayPop 0.8s ease forwards';
+            
+            // 延迟添加闪烁效果
+            setTimeout(() => {
+                birthdayTitle.classList.add('glowing');
+            }, 1000);
+            
+            // 添加点击播放音乐的提示（如果自动播放被阻止）
+            endingScene.onclick = () => {
+                try {
+                    bgm.play();
+                } catch(e) {}
+            };
+        }
+        
+        function startConfetti() {
+            const colors = ['#D8F878', '#FFCCB6', '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7', '#C7CEEA'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-20px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 100);
+            }
+            
+            // 持续礼花
+            setInterval(() => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.top = '-20px';
+                        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                        confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                        confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                        confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+                        document.body.appendChild(confetti);
+                        
+                        setTimeout(() => confetti.remove(), 5000);
+                    }, i * 200);
+                }
+            }, 2000);
+        }
+        
+        // ===== 初始化 =====
+        window.onload = () => {
+            initLogin();
+        };
     </script>
 </body>
 </html>
