@@ -8,26 +8,23 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Preline UI -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/preline@2.0.0/dist/preline.min.js"></script>
     
     <style>
         :root {
             --bg-primary: #FFFBF8;
             --bg-secondary: #FFCCB6;
             --accent: #D8F878;
-            --text-dark: #2D2D2D;
-            --text-light: #666666;
+            --accent-dark: #b8d858;
+            --text-dark: #2d2d2d;
+            --text-light: #666;
             --wechat-green: #95EC69;
             --wechat-white: #FFFFFF;
-            --gradient-warm: linear-gradient(135deg, #FFFBF8 0%, #FFCCB6 50%, #FFE4D6 100%);
-            --gradient-accent: linear-gradient(135deg, #D8F878 0%, #B8E848 100%);
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-medium: 0 8px 40px rgba(0,0,0,0.12);
         }
         
         * {
@@ -43,10 +40,11 @@
             overflow: hidden;
             font-family: 'Noto Sans SC', sans-serif;
             background: var(--bg-primary);
+            color: var(--text-dark);
         }
         
-        /* ===== 场景容器 ===== */
-        .scene {
+        /* ==================== 通用容器 ==================== */
+        .screen {
             position: fixed;
             top: 0;
             left: 0;
@@ -57,41 +55,87 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.6s ease;
+            transition: opacity 0.5s ease;
             overflow: hidden;
         }
         
-        .scene.active {
+        .screen.active {
             display: flex;
             opacity: 1;
         }
         
-        /* ===== 登录页面 - PS5风格 ===== */
-        #login-scene {
-            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+        .screen.fade-out {
+            opacity: 0;
+        }
+        
+        /* ==================== 渐变背景 ==================== */
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--accent) 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* ==================== 登录页面 ==================== */
+        #login-screen {
+            background: linear-gradient(180deg, #0a0a15 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
+            position: relative;
+        }
+        
+        #login-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(216, 248, 120, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 204, 182, 0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
         
         .login-text {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 300;
             color: white;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.8em;
             opacity: 0;
+            font-family: 'Noto Sans SC', sans-serif;
             text-shadow: 0 0 30px rgba(255,255,255,0.3);
+        }
+        
+        .login-text.typing {
+            animation: typeIn 2s ease forwards, fadeOutText 1s ease 3s forwards;
+        }
+        
+        @keyframes typeIn {
+            0% { opacity: 0; letter-spacing: 1em; }
+            100% { opacity: 1; letter-spacing: 0.5em; }
+        }
+        
+        @keyframes fadeOutText {
+            to { opacity: 0; }
         }
         
         .avatar-container {
             position: relative;
-            width: 140px;
-            height: 140px;
-            cursor: pointer;
+            width: 130px;
+            height: 130px;
             opacity: 0;
             transform: scale(0.8);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
         }
         
-        .avatar-container:hover {
-            transform: scale(1.05);
+        .avatar-container.visible {
+            opacity: 1;
+            transform: scale(1);
         }
         
         .avatar-container:active {
@@ -104,77 +148,114 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid rgba(255,255,255,0.2);
-            box-shadow: 0 0 40px rgba(216, 248, 120, 0.3);
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 0 0 4px rgba(216, 248, 120, 0.1),
+                0 0 30px rgba(0,0,0,0.3),
+                0 0 60px rgba(216, 248, 120, 0.1);
+        }
+        
+        .avatar-container:hover .avatar {
+            border-color: rgba(216, 248, 120, 0.5);
+            box-shadow: 
+                0 0 0 4px rgba(216, 248, 120, 0.2),
+                0 0 40px rgba(216, 248, 120, 0.3),
+                0 0 80px rgba(216, 248, 120, 0.1);
         }
         
         .avatar-glow {
             position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, transparent, var(--accent), transparent, var(--bg-secondary), transparent);
+            background: conic-gradient(from 0deg, transparent, var(--accent), transparent 30%, var(--bg-secondary), transparent 60%, var(--accent), transparent);
             opacity: 0;
             animation: none;
+            filter: blur(2px);
         }
         
-        @keyframes avatarGlow {
-            0% { transform: rotate(0deg); opacity: 0.8; }
-            100% { transform: rotate(360deg); opacity: 0.8; }
+        .avatar-container.clicked .avatar-glow {
+            animation: glowSpin 1.2s linear forwards;
         }
         
-        .avatar-container.glowing .avatar-glow {
-            animation: avatarGlow 1.5s linear infinite;
+        .avatar-container.clicked .avatar {
+            animation: avatarPulse 0.6s ease;
+        }
+        
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes glowSpin {
+            0% { opacity: 0; transform: rotate(0deg); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: rotate(360deg); }
         }
         
         /* 波纹效果 */
         .ripple {
             position: fixed;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(216,248,120,0.4) 0%, transparent 70%);
-            transform: scale(0);
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
             pointer-events: none;
+            animation: rippleExpand 1.5s ease-out forwards;
         }
         
         @keyframes rippleExpand {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(20); opacity: 0; }
+            0% { 
+                width: 0; 
+                height: 0; 
+                opacity: 0.8; 
+            }
+            100% { 
+                width: 300vmax; 
+                height: 300vmax; 
+                opacity: 0; 
+            }
         }
         
-        .success-text {
-            font-size: 2rem;
-            font-weight: 300;
+        .login-success {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: 500;
             color: var(--accent);
-            letter-spacing: 0.2em;
             opacity: 0;
-            text-shadow: 0 0 30px rgba(216, 248, 120, 0.5);
+            letter-spacing: 0.3em;
         }
         
-        /* ===== 主页 ===== */
-        #main-scene {
+        .login-success.show {
+            animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        @keyframes successPop {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* ==================== 主页面 ==================== */
+        #main-screen {
             background: #000;
-            cursor: pointer;
         }
         
         .main-bg {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
+            object-position: center;
         }
         
         .start-hint {
             position: absolute;
             bottom: 15%;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: rgba(255,255,255,0.9);
-            letter-spacing: 0.15em;
-            text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
             animation: breathe 2.5s ease-in-out infinite;
+            font-family: 'Noto Sans SC', sans-serif;
+            letter-spacing: 0.2em;
         }
         
         @keyframes breathe {
@@ -182,193 +263,280 @@
             50% { opacity: 1; transform: scale(1.02); }
         }
         
-        /* ===== 故事页面 ===== */
-        #story-scene {
-            background: var(--gradient-warm);
-            padding: 20px;
+        /* ==================== 故事页面 ==================== */
+        #story-screen {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            padding: 0;
         }
         
         .story-container {
             width: 100%;
-            max-width: 420px;
             height: 100%;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             position: relative;
+            padding: 20px;
         }
         
-        .story-image-container {
+        .story-image-wrapper {
             width: 100%;
+            max-width: 380px;
             max-height: 45vh;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+        
+        .story-image-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent), var(--bg-secondary), var(--accent));
+            border-radius: 26px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: -1;
+        }
+        
+        .story-image-wrapper:has(.story-image.visible)::before {
+            opacity: 0.6;
         }
         
         .story-image {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
+            border-radius: 22px;
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.15),
+                0 0 0 1px rgba(255,255,255,0.1);
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transform: scale(0.92) translateY(10px);
+            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .story-image.visible {
             opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        
+        .story-image.wipe-out {
+            animation: wipeOut 0.8s ease forwards;
+        }
+        
+        @keyframes wipeOut {
+            0% { clip-path: inset(0 0 0 0); opacity: 1; }
+            100% { clip-path: inset(0 100% 0 0); opacity: 0; }
         }
         
         .story-text-area {
-            flex: 1;
+            width: 100%;
+            max-width: 400px;
+            min-height: 120px;
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
             padding: 20px;
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            min-height: 200px;
+            position: relative;
         }
         
         .story-text {
-            font-size: 1.15rem;
-            line-height: 1.9;
-            color: var(--text-dark);
+            font-size: 1.1rem;
+            line-height: 1.8;
             text-align: center;
-            min-height: 3em;
-        }
-        
-        .story-text .char {
+            color: var(--text-dark);
             opacity: 0;
-            display: inline-block;
+            font-family: 'Noto Sans SC', sans-serif;
         }
         
-        @keyframes charFadeIn {
-            0% { opacity: 0; transform: translateY(5px); }
-            100% { opacity: 1; transform: translateY(0); }
+        .story-text.expand-in {
+            animation: expandFromCenter 0.8s ease forwards;
         }
         
-        @keyframes charFadeOut {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.5) translateY(-10px); }
+        @keyframes expandFromCenter {
+            0% { 
+                opacity: 0; 
+                clip-path: inset(0 50% 0 50%);
+            }
+            100% { 
+                opacity: 1; 
+                clip-path: inset(0 0 0 0);
+            }
         }
         
-        .tap-hint {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            font-size: 0.85rem;
-            color: var(--text-light);
-            opacity: 0.6;
-            animation: pulse 2s ease-in-out infinite;
+        .story-text.particle-out {
+            animation: particleDissolve 1s ease forwards;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.8; }
+        @keyframes particleDissolve {
+            0% { 
+                opacity: 1; 
+                filter: blur(0); 
+                transform: scale(1);
+            }
+            100% { 
+                opacity: 0; 
+                filter: blur(10px); 
+                transform: scale(1.1);
+            }
+        }
+        
+        .story-text.bold-shake {
+            font-size: 1.4rem;
+            font-weight: 700;
+            animation: expandFromCenter 0.8s ease forwards, textShake 0.5s ease 0.8s;
+        }
+        
+        @keyframes textShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
         }
         
         /* 选项按钮 */
         .choices-container {
-            display: none;
+            display: flex;
             flex-direction: column;
             gap: 12px;
+            width: 100%;
+            max-width: 350px;
             margin-top: 20px;
-            padding: 0 10px;
+            opacity: 0;
+        }
+        
+        .choices-container.visible {
+            animation: fadeSlideUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
         
         .choice-btn {
             padding: 16px 24px;
             font-size: 1rem;
             font-family: 'Noto Sans SC', sans-serif;
-            border: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,251,248,0.9));
+            border: 2px solid rgba(216, 248, 120, 0.3);
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-align: left;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
         
-        .choice-btn.choice-a {
-            background: linear-gradient(135deg, var(--accent) 0%, #C8E858 100%);
-            color: var(--text-dark);
-            box-shadow: 0 4px 15px rgba(216, 248, 120, 0.4);
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(216, 248, 120, 0.3), transparent);
+            transition: left 0.5s ease;
         }
         
-        .choice-btn.choice-b {
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, #FFB8A0 100%);
-            color: var(--text-dark);
-            box-shadow: 0 4px 15px rgba(255, 204, 182, 0.4);
+        .choice-btn:hover::before, .choice-btn:active::before {
+            left: 100%;
         }
         
-        .choice-btn:hover {
-            transform: translateY(-3px) scale(1.02);
+        .choice-btn:hover, .choice-btn:active {
+            transform: scale(1.03) translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px rgba(216, 248, 120, 0.25), 0 4px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, rgba(255,255,255,1), rgba(216, 248, 120, 0.15));
         }
         
-        .choice-btn:active {
-            transform: scale(0.98);
-        }
-        
-        /* 页面震动 */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-        
-        .shaking {
-            animation: shake 0.5s ease-in-out;
-        }
-        
-        /* 大号加粗文字 */
-        .story-text.bold-large {
-            font-size: 1.5rem;
-            font-weight: 700;
+        .choice-btn span {
+            position: relative;
+            z-index: 1;
         }
         
         /* 气泡样式 */
         .bubble {
             background: white;
-            padding: 15px 20px;
+            padding: 16px 24px;
             border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-soft);
             position: relative;
-            margin: 10px 0;
+            max-width: 300px;
+            margin: 20px auto;
             cursor: pointer;
             transition: all 0.3s ease;
         }
         
         .bubble:hover {
             transform: scale(1.02);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow-medium);
         }
         
         .bubble::after {
             content: '';
             position: absolute;
-            bottom: -8px;
+            bottom: -10px;
             left: 50%;
             transform: translateX(-50%);
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 10px solid white;
+            border: 10px solid transparent;
+            border-top-color: white;
         }
         
-        /* ===== 微信聊天页面 ===== */
-        #wechat-scene {
+        /* 页面震动 */
+        .shake {
+            animation: pageShake 0.6s ease;
+        }
+        
+        @keyframes pageShake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-8px, -4px); }
+            20% { transform: translate(8px, 4px); }
+            30% { transform: translate(-6px, 2px); }
+            40% { transform: translate(6px, -2px); }
+            50% { transform: translate(-4px, 4px); }
+            60% { transform: translate(4px, -4px); }
+            70% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            90% { transform: translate(-1px, 1px); }
+        }
+        
+        /* 点击提示 */
+        .tap-hint {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            opacity: 0;
+            animation: fadeInOut 2s ease infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* ==================== 微信聊天页面 ==================== */
+        #wechat-screen {
             background: #EDEDED;
         }
         
         .wechat-container {
             width: 100%;
-            max-width: 420px;
             height: 100%;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             background: #EDEDED;
@@ -376,182 +544,316 @@
         
         .wechat-header {
             background: #EDEDED;
-            padding: 15px 20px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-bottom: 1px solid #D9D9D9;
+            border-bottom: 0.5px solid rgba(0,0,0,0.1);
             position: relative;
         }
         
-        .wechat-header .back-btn {
+        .wechat-header::after {
+            content: '';
             position: absolute;
-            left: 15px;
-            font-size: 1.2rem;
-            color: #333;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
+        }
+        
+        .wechat-back {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-right: 12px;
+            opacity: 0.6;
         }
         
         .wechat-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 500;
-            color: #333;
+            flex: 1;
+            text-align: center;
+            margin-right: 24px;
         }
         
         .wechat-messages {
             flex: 1;
+            padding: 16px 12px;
             overflow-y: auto;
-            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            background: #EDEDED;
         }
         
         .message-row {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: 8px;
             opacity: 0;
-            transform: translateY(20px);
-            animation: messageIn 0.4s ease forwards;
+            transform: translateY(8px);
+        }
+        
+        .message-row.visible {
+            animation: messageIn 0.35s ease forwards;
         }
         
         @keyframes messageIn {
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .message-row.sent {
+        .message-row.right {
             flex-direction: row-reverse;
         }
         
-        .message-avatar {
+        .msg-avatar {
             width: 42px;
             height: 42px;
-            border-radius: 6px;
+            border-radius: 5px;
             object-fit: cover;
             flex-shrink: 0;
         }
         
-        .message-bubble {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 6px;
-            font-size: 1rem;
+        .msg-bubble {
+            max-width: 65%;
+            padding: 10px 14px;
+            border-radius: 4px;
+            font-size: 0.95rem;
             line-height: 1.5;
+            position: relative;
             word-break: break-word;
         }
         
-        .message-row.received .message-bubble {
-            background: white;
-            color: #333;
+        .message-row.left .msg-bubble {
+            background: var(--wechat-white);
+            border-radius: 0 4px 4px 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         
-        .message-row.sent .message-bubble {
-            background: var(--wechat-green);
-            color: #333;
-        }
-        
-        .message-bubble::before {
+        .message-row.left .msg-bubble::before {
             content: '';
             position: absolute;
+            left: -6px;
+            top: 0;
+            border: 6px solid transparent;
+            border-right-color: var(--wechat-white);
+            border-top-color: var(--wechat-white);
+        }
+        
+        .message-row.right .msg-bubble {
+            background: var(--wechat-green);
+            border-radius: 4px 0 4px 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .message-row.right .msg-bubble::before {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 0;
+            border: 6px solid transparent;
+            border-left-color: var(--wechat-green);
+            border-top-color: var(--wechat-green);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 10px 14px;
+            background: var(--wechat-white);
+            border-radius: 4px;
+            width: fit-content;
+        }
+        
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background: #b0b0b0;
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 1; }
         }
         
         .system-message {
             text-align: center;
-            font-size: 0.85rem;
-            color: #999;
-            padding: 5px 0;
+            font-size: 0.8rem;
+            color: #b0b0b0;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 4px;
+            margin: 8px auto;
+            max-width: 200px;
         }
         
         .wechat-choices {
-            padding: 15px;
-            background: #F7F7F7;
-            border-top: 1px solid #D9D9D9;
-            display: none;
+            padding: 12px 16px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            background: #f7f7f7;
+            border-top: 0.5px solid rgba(0,0,0,0.08);
+            display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
         
-        /* ===== 结局页面 ===== */
-        #ending-scene {
+        .wechat-choice-btn {
+            padding: 14px 18px;
+            font-size: 0.9rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            text-align: left;
+            color: var(--text-dark);
+        }
+        
+        .wechat-choice-btn:active {
+            transform: scale(0.98);
+            background: #f5f5f5;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        
+        /* ==================== 结局页面 ==================== */
+        #ending-screen {
             background: #000;
+            transition: background 2s ease;
         }
         
         .ending-container {
             width: 100%;
-            max-width: 420px;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .ending-image {
-            width: 100%;
-            max-height: 50vh;
-            object-fit: contain;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 0.8s ease;
-        }
-        
-        .ending-image.visible {
-            opacity: 1;
-            transform: scale(1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
         }
         
         .ending-text {
-            font-size: 1.2rem;
-            line-height: 2;
-            color: white;
+            font-size: 1.15rem;
+            line-height: 2.2;
+            text-align: center;
+            color: rgba(255,255,255,0.95);
             opacity: 0;
-            transform: translateY(20px);
+            max-width: 340px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
-        .ending-text.visible {
-            opacity: 1;
-            transform: translateY(0);
-            transition: all 0.6s ease;
+        .ending-text.fade-in {
+            animation: endingFadeIn 1.8s ease forwards;
         }
         
-        .birthday-title {
-            font-family: 'ZCOOL KuaiLe', cursive;
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, var(--accent), var(--bg-secondary), #FF9AA2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        @keyframes endingFadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ending-image {
+            max-width: 85%;
+            max-height: 45vh;
+            object-fit: contain;
+            border-radius: 20px;
             margin-top: 20px;
             opacity: 0;
-            animation: none;
+            transform: scale(0.9);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         
-        @keyframes birthdayPop {
-            0% { opacity: 0; transform: scale(0.5); }
-            50% { transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
+        .ending-image.pop-in {
+            animation: endingImagePop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        @keyframes endingImagePop {
+            0% { opacity: 0; transform: scale(0.85) rotate(-2deg); }
+            60% { transform: scale(1.02) rotate(1deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
         }
         
         /* 礼花效果 */
-        .confetti {
+        .confetti-container {
             position: fixed;
-            width: 12px;
-            height: 12px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
+            overflow: hidden;
             z-index: 1000;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall linear forwards;
         }
         
         @keyframes confettiFall {
             0% {
-                transform: translateY(-100vh) rotate(0deg);
+                transform: translateY(-100%) rotate(0deg);
                 opacity: 1;
             }
             100% {
                 transform: translateY(100vh) rotate(720deg);
-                opacity: 0.7;
+                opacity: 0;
             }
         }
         
-        /* ===== 加载动画 ===== */
+        /* 生日文字 */
+        .birthday-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(
+                135deg, 
+                #ff6b6b 0%, 
+                #feca57 20%, 
+                #D8F878 40%, 
+                #48dbfb 60%, 
+                #ff9ff3 80%, 
+                #ff6b6b 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 24px;
+            opacity: 0;
+            text-align: center;
+            font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+            text-shadow: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            animation: none;
+        }
+        
+        .birthday-title.celebrate {
+            animation: 
+                birthdayCelebrate 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                rainbowShift 3s linear infinite 1s;
+        }
+        
+        @keyframes birthdayCelebrate {
+            0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+            50% { transform: scale(1.15) rotate(5deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes rainbowShift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        /* 加载动画 */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -564,6 +866,11 @@
             justify-content: center;
             z-index: 9999;
             transition: opacity 0.5s ease;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         
         .loading-spinner {
@@ -579,152 +886,64 @@
             to { transform: rotate(360deg); }
         }
         
-        /* ===== 响应式调整 ===== */
-        @media (max-width: 380px) {
-            .story-text { font-size: 1rem; }
-            .choice-btn { padding: 14px 18px; font-size: 0.95rem; }
-            .login-text { font-size: 2rem; }
-        }
-        
-        @media (min-height: 800px) {
-            .story-image-container { max-height: 50vh; }
-        }
-        
-        /* 擦除动画 */
-        @keyframes wipeOut {
-            0% { clip-path: inset(0 0 0 0); }
-            100% { clip-path: inset(0 0 0 100%); }
-        }
-        
-        .wipe-out {
-            animation: wipeOut 0.6s ease forwards;
-        }
-        
-        /* 粒子消散效果 */
-        @keyframes particleFade {
-            0% { 
-                opacity: 1; 
-                transform: translateY(0) scale(1); 
-                filter: blur(0);
-            }
-            100% { 
-                opacity: 0; 
-                transform: translateY(-30px) scale(0.3); 
-                filter: blur(4px);
-            }
-        }
-        
-        .particle-fade .char {
-            animation: particleFade 0.6s ease forwards;
-        }
-        
-        /* 微信撤回消息效果 */
-        .message-recalled {
-            opacity: 0.5;
-            text-decoration: line-through;
-        }
-        
-        /* 选项按钮涟漪效果 */
-        .choice-btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255,255,255,0.3);
+        /* 音频控制 */
+        .audio-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-soft);
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.3s ease;
         }
         
-        .choice-btn:active::after {
-            width: 300px;
-            height: 300px;
+        .audio-toggle.visible {
+            opacity: 1;
         }
         
-        /* 故事页面图片加载动画 */
-        .story-image-container::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 30px;
-            height: 30px;
-            border: 2px solid var(--bg-secondary);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            opacity: 0.5;
-            z-index: 1;
+        .audio-toggle:active {
+            transform: scale(0.95);
         }
         
-        .story-image-container:has(.story-image.visible)::before {
-            display: none;
+        .audio-toggle i {
+            font-size: 1.2rem;
+            color: var(--text-dark);
         }
         
-        /* 结局页面背景渐变 */
-        #ending-scene {
-            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%);
-        }
-        
-        /* 生日标题闪烁效果 */
-        @keyframes titleGlow {
-            0%, 100% { text-shadow: 0 0 20px rgba(216, 248, 120, 0.5); }
-            50% { text-shadow: 0 0 40px rgba(216, 248, 120, 0.8), 0 0 60px rgba(255, 204, 182, 0.6); }
-        }
-        
-        .birthday-title.glowing {
-            animation: titleGlow 2s ease-in-out infinite;
-        }
-        
-        /* 移动端触控反馈 */
-        @media (hover: none) {
-            .choice-btn:active {
-                transform: scale(0.95);
-                filter: brightness(0.95);
+        /* 响应式调整 */
+        @media (min-width: 768px) {
+            .story-image-wrapper {
+                max-width: 500px;
+                max-height: 55vh;
             }
             
-            .avatar-container:active {
-                transform: scale(0.9);
-            }
-        }
-        
-        /* 安全区域适配（iPhone刘海屏等） */
-        @supports (padding-top: env(safe-area-inset-top)) {
-            .wechat-header {
-                padding-top: calc(15px + env(safe-area-inset-top));
+            .story-text {
+                font-size: 1.2rem;
             }
             
-            .wechat-choices {
-                padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            .choice-btn {
+                font-size: 1.1rem;
             }
         }
         
-        /* 深色模式下的微信样式 */
-        .wechat-container {
-            position: relative;
-        }
-        
-        /* 故事文字渐变效果 */
-        .story-text.highlight {
-            background: linear-gradient(135deg, var(--accent), var(--bg-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* 气泡点击提示 */
-        .bubble::before {
-            content: '点击继续';
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: var(--text-light);
-            opacity: 0.6;
-            white-space: nowrap;
+        /* 安全区域适配 - iOS刘海屏等 */
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .story-container {
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+            
+            .ending-container {
+                padding-bottom: calc(24px + env(safe-area-inset-bottom));
+            }
         }
     </style>
 </head>
@@ -734,289 +953,140 @@
         <div class="loading-spinner"></div>
     </div>
     
-    <!-- 场景1: 登录页面 -->
-    <div class="scene active" id="login-scene">
-        <p class="login-text" id="login-text">请 登 录</p>
-        <div class="avatar-container" id="avatar-container" style="display: none;">
+    <!-- 音频控制按钮 -->
+    <button class="audio-toggle" id="audioToggle" aria-label="音乐开关">
+        <i class="fas fa-volume-up"></i>
+    </button>
+    
+    <!-- 背景音乐 -->
+    <audio id="bgm" loop preload="auto">
+        <source src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/HappyBirthdaySong.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- 音效 -->
+    <audio id="sfx-click" preload="auto">
+        <source src="https://cdn.jsdelivr.net/gh/nickyonge/javascript-sfx/sfx/click.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sfx-message" preload="auto">
+        <source src="https://cdn.jsdelivr.net/gh/nickyonge/javascript-sfx/sfx/pop.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- ==================== 登录页面 ==================== -->
+    <div class="screen active" id="login-screen">
+        <p class="login-text" id="loginText">请 登 录</p>
+        <div class="avatar-container" id="avatarContainer">
             <div class="avatar-glow"></div>
-            <img src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/fqq-avtar.jpg" 
-                 alt="Avatar" class="avatar" id="avatar">
+            <img class="avatar" src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/fqq-avtar.jpg" alt="头像" loading="eager">
         </div>
-        <p class="success-text" id="success-text">登 入 成 功</p>
+        <p class="login-success" id="loginSuccess">登入成功</p>
     </div>
     
-    <!-- 场景2: 游戏主页 -->
-    <div class="scene" id="main-scene">
-        <img src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/mainpage.jpg" 
-             alt="Main" class="main-bg" loading="lazy">
+    <!-- ==================== 主页面 ==================== -->
+    <div class="screen" id="main-screen">
+        <img class="main-bg" src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/mainpage.jpg" alt="主页背景" loading="eager">
         <p class="start-hint">点击任意地方开始做梦</p>
     </div>
     
-    <!-- 场景3: 故事页面 -->
-    <div class="scene" id="story-scene">
-        <div class="story-container">
-            <div class="story-image-container">
-                <img src="" alt="" class="story-image" id="story-image">
+    <!-- ==================== 故事页面 ==================== -->
+    <div class="screen" id="story-screen">
+        <div class="story-container" id="storyContainer">
+            <div class="story-image-wrapper">
+                <img class="story-image" id="storyImage" src="" alt="故事配图">
             </div>
-            <div class="story-text-area" id="story-text-area">
-                <p class="story-text" id="story-text"></p>
-                <div class="choices-container" id="choices-container"></div>
-                <span class="tap-hint" id="tap-hint"><i class="fas fa-hand-pointer"></i> 点击继续</span>
+            <div class="story-text-area">
+                <p class="story-text" id="storyText"></p>
             </div>
+            <div class="choices-container" id="choicesContainer"></div>
+            <p class="tap-hint" id="tapHint">点击继续</p>
         </div>
     </div>
     
-    <!-- 场景4: 微信聊天 -->
-    <div class="scene" id="wechat-scene">
+    <!-- ==================== 微信页面 ==================== -->
+    <div class="screen" id="wechat-screen">
         <div class="wechat-container">
             <div class="wechat-header">
-                <i class="fas fa-chevron-left back-btn"></i>
+                <i class="fas fa-chevron-left wechat-back"></i>
                 <span class="wechat-title">导员CPU版</span>
             </div>
-            <div class="wechat-messages" id="wechat-messages"></div>
-            <div class="wechat-choices" id="wechat-choices"></div>
+            <div class="wechat-messages" id="wechatMessages"></div>
+            <div class="wechat-choices" id="wechatChoices"></div>
         </div>
     </div>
     
-    <!-- 场景5: 结局页面 -->
-    <div class="scene" id="ending-scene">
+    <!-- ==================== 结局页面 ==================== -->
+    <div class="screen" id="ending-screen">
         <div class="ending-container">
-            <img src="" alt="" class="ending-image" id="ending-image">
-            <div class="ending-text" id="ending-text"></div>
-            <h1 class="birthday-title" id="birthday-title">付QQ，生日快乐！</h1>
+            <div id="endingTextContainer"></div>
+            <img class="ending-image" id="endingImage" src="" alt="结局图片">
+            <h1 class="birthday-title" id="birthdayTitle"></h1>
         </div>
+        <div class="confetti-container" id="confettiContainer"></div>
     </div>
-    
-    <!-- 背景音乐 -->
-    <audio id="bgm" loop>
-        <source src="https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/HappyBirthdaySong.mp3" type="audio/mpeg">
-    </audio>
 
     <script>
-        // ===== 全局变量 =====
+        // ==================== 图片资源 CDN ====================
         const CDN_BASE = 'https://cdn.jsdelivr.net/gh/LOOTOOT/WorkingQQ@main/';
-        let currentScene = 'login';
-        let storyIndex = 0;
-        let currentPath = []; // 记录玩家选择路径
-        let canTap = false;
-        let isTyping = false;
-        let wechatChoice = ''; // 记录微信选项
-        
-        // 图片映射表（处理中文文件名）
-        const imageMap = {
-            'sleeping.png': 'sleeping.png',
-            '付QQ接电话无语.png': '%E4%BB%98QQ%E6%8E%A5%E7%94%B5%E8%AF%9D%E6%97%A0%E8%AF%AD.png',
-            '我骟QQ彻底怒了.png': '%E6%88%91%E9%AA%9FQQ%E5%BD%BB%E5%BA%95%E6%80%92%E4%BA%86.png',
-            '付QQ神威大发.png': '%E4%BB%98QQ%E7%A5%9E%E5%A8%81%E5%A4%A7%E5%8F%91.png',
-            '付QQ脚踩金钥.png': '%E4%BB%98QQ%E8%84%9A%E8%B8%A9%E9%87%91%E9%92%A5.png',
-            '付QQ战斗胜利结算画面.png': '%E4%BB%98QQ%E6%88%98%E6%96%97%E8%83%9C%E5%88%A9%E7%BB%93%E7%AE%97%E7%94%BB%E9%9D%A2.png',
-            '晕头转向电脑局.png': '%E6%99%95%E5%A4%B4%E8%BD%AC%E5%90%91%E7%94%B5%E8%84%91%E5%B1%80.png',
-            '躺在床上睁眼的付QQ.png': '%E8%BA%BA%E5%9C%A8%E5%BA%8A%E4%B8%8A%E7%9D%81%E7%9C%BC%E7%9A%84%E4%BB%98QQ.png',
-            'FQQHappyBirthday.png': 'FQQHappyBirthday.png',
-            'fqq-avtar.jpg': 'fqq-avtar.jpg',
-            'img-left.jpg': 'img-left.jpg',
-            'mainpage.jpg': 'mainpage.jpg'
+        const IMAGES = {
+            avatar: CDN_BASE + 'fqq-avtar.jpg',
+            avatarLeft: CDN_BASE + 'img-left.jpg',
+            mainpage: CDN_BASE + 'mainpage.jpg',
+            sleeping: CDN_BASE + 'sleeping.png',
+            phoneCall: CDN_BASE + '付QQ接电话无语.png',
+            angry: CDN_BASE + '我骟QQ彻底怒了.png',
+            powerful: CDN_BASE + '付QQ神威大发.png',
+            stepping: CDN_BASE + '付QQ脚踩金钥.png',
+            victory: CDN_BASE + '付QQ战斗胜利结算画面.png',
+            computer: CDN_BASE + '晕头转向电脑局.png',
+            wakeup: CDN_BASE + '躺在床上睁眼的付QQ.png',
+            birthday: CDN_BASE + 'FQQHappyBirthday.png'
         };
         
-        // ===== 故事脚本数据 =====
-        const storyData = {
-            // 开篇
-            'start': [
-                { image: 'sleeping.png', text: '你是付QQ，23英语2班的班长。' },
-                { text: 'AAA纯血正宗PPT大王AKA导员免费劳动力' },
-                { text: '现在是北京时间12月7日，早上8点20分\n你正在享受美好的周末', dissipate: true },
-                { text: '一阵强劲的音乐袭来！', bold: true, shake: true, wipeImage: true },
-                { text: '是你的QQ电话响了呢，你决定', smaller: true },
-                { 
-                    choices: [
-                        { text: 'A. 谁啊？接一下吧', goto: 'path_a1' },
-                        { text: 'B. 都衮，没人能阻止我睡觉', goto: 'ending_sleep' }
-                    ]
-                }
-            ],
-            
-            // A1路线 - 接电话
-            'path_a1': [
-                { image: '付QQ接电话无语.png', text: '「喂，老师。」' },
-                { text: '手机传来你导员的声音' },
-                { text: '「付QQ你现在做一个优秀班集体的PPT，下午4点前给我。」' },
-                { text: '………什么玩意儿？做PPT？你' },
-                {
-                    choices: [
-                        { text: 'A. 怒了，拒绝', goto: 'path_a2' },
-                        { text: 'B. 已老实，一会儿就去做', goto: 'path_b2' }
-                    ]
-                }
-            ],
-            
-            // A2路线 - 怒了
-            'path_a2': [
-                { image: '我骟QQ彻底怒了.png', text: '大早上做什么PPT？你彻底怒了' },
-                { text: '往日种种在眼前浮现，你忍无可忍，速速动手' },
-                { bubble: '「你不会做PPT吗？自己搞啊」' },
-                { text: '手机传来导员低沉的声音：「付QQ你怎么和老师说话的？」' },
-                {
-                    choices: [
-                        { text: 'A. 我现在就这个态度，不爱听别听', goto: 'path_a3' },
-                        { text: 'B. 对不起老师我刚刚没睡醒', goto: 'path_b2' }
-                    ]
-                }
-            ],
-            
-            // A3路线 - 继续硬刚
-            'path_a3': [
-                { text: '电话那头安静如鸡，随后是带着怒意的一声喊：「付QQ！」' },
-                { text: '你毫不示弱：「吼那么大声干嘛？现在是周末！我还在睡觉！」' },
-                { image: '付QQ神威大发.png', text: '导员：「你是班长，要有奉献精神！」' },
-                {
-                    choices: [
-                        { text: 'A. 奉献精神？那你给我发工资了吗？', goto: 'path_a4' },
-                        { text: 'B. 这班长谁爱当谁当，我不干了！', goto: 'path_b4' }
-                    ]
-                }
-            ],
-            
-            // A4路线 - 工资论
-            'path_a4': [
-                { text: '「你给我工资了吗要求这么多？我白干这么久还没找你算账呢！」' },
-                { text: '导员：「你怎么这么计较」' },
-                { image: '付QQ脚踩金钥.png', text: '你乘胜追击：「计较？那我们现在就算算，我干了多少活，你该给我多少钱？」' },
-                { text: '导员：「好了，你先休息」' },
-                { text: '「啪！」你直接挂了电话。' },
-                { image: '付QQ战斗胜利结算画面.png', text: '怼得你神清气爽，也不多啰嗦。' },
-                { goto: 'wechat' }
-            ],
-            
-            // B4路线 - 辞职论
-            'path_b4': [
-                { text: '「这班长谁爱当谁当！你现在就找别人，我立刻退出所有群！」' },
-                { text: '导员：「付QQ有话好好说」' },
-                { image: '付QQ脚踩金钥.png', text: '「没什么好说的，我受够了。再见。」' },
-                { text: '「啪！」你干脆利落地挂了电话。' },
-                { image: '付QQ战斗胜利结算画面.png', text: '怼得你神清气爽，也不多啰嗦。' },
-                { goto: 'wechat' }
-            ],
-            
-            // B2路线 - 老实做PPT
-            'path_b2': [
-                { image: '晕头转向电脑局.png', text: '你叹了口气：「好的老师，我尽快做」' },
-                { text: '挂了电话，你打开电脑开始收集材料' },
-                { text: '中午煮了火鸡面，你边吃边做' },
-                { text: '下午3点发到老师邮箱' },
-                { text: '老师回复：\'下次要更主动些\'' },
-                { text: '你苦笑一下，关掉电脑', clearImage: true },
-                { text: '躺回床上休息' },
-                { text: '盯着天花板发呆...' },
-                { goto: 'ending_reality' }
-            ],
-            
-            // 睡觉结局
-            'ending_sleep': [
-                { goto: 'ending_sleep_final' }
-            ]
+        // ==================== 游戏状态 ====================
+        const GameState = {
+            currentScreen: 'login',
+            storyStep: 0,
+            branch: 'main',
+            endingType: null, // 'hero-victory', 'hero-quiet', 'hero-sleep', 'reality'
+            audioEnabled: true
         };
         
-        // 微信聊天数据
-        const wechatData = {
-            initial: [
-                { sender: 'teacher', text: '付QQ你怎么敢挂老师电话？' },
-                { sender: 'teacher', text: '太不像话了！' }
-            ],
-            choiceA5: [
-                { sender: 'me', text: '不像话的是你吧？周末早上八点打电话让人做PPT？' },
-                { sender: 'me', text: '你自己怎么不做？就知道使唤学生？' },
-                { sender: 'teacher', text: '你这样态度有问题，我要跟你家长谈谈！' },
-                { sender: 'me', text: '谈啊，说我在学校被当免费劳动力' },
-                { sender: 'me', text: '你打啊，现在就打' },
-                { type: 'wait', duration: 3000 },
-                { type: 'system', text: '…………' },
-                { type: 'system', text: '对方已撤回一条消息' },
-                { sender: 'teacher', text: '算了，你冷静一下。PPT我找别人做。' }
-            ],
-            choiceB5: [
-                { sender: 'teacher', text: '？' },
-                { sender: 'teacher', text: '付QQ，看到回复。' },
-                { type: 'system', text: '十分钟后' },
-                { sender: 'teacher', text: '行，你厉害。PPT不用你做了。' }
-            ]
+        // ==================== DOM 元素 ====================
+        const $ = id => document.getElementById(id);
+        const screens = {
+            login: $('login-screen'),
+            main: $('main-screen'),
+            story: $('story-screen'),
+            wechat: $('wechat-screen'),
+            ending: $('ending-screen')
         };
         
-        // ===== 工具函数 =====
-        function sleep(ms) {
+        const audioToggle = $('audioToggle');
+        const bgm = $('bgm');
+        const sfxClick = $('sfx-click');
+        const sfxMessage = $('sfx-message');
+        
+        // ==================== 工具函数 ====================
+        function playSound(audio) {
+            if (GameState.audioEnabled && audio) {
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+            }
+        }
+        
+        function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
         
-        function getImageUrl(filename) {
-            // 使用映射表获取编码后的文件名
-            const encodedName = imageMap[filename] || encodeURIComponent(filename);
-            return CDN_BASE + encodedName;
-        }
-        
-        // ===== 登录页面逻辑 =====
-        async function initLogin() {
-            const loginText = document.getElementById('login-text');
-            const avatarContainer = document.getElementById('avatar-container');
-            const successText = document.getElementById('success-text');
-            
-            // 隐藏加载
-            await sleep(800);
-            document.getElementById('loading').style.opacity = '0';
-            await sleep(500);
-            document.getElementById('loading').style.display = 'none';
-            
-            // 打字效果显示"请登录"
-            await sleep(500);
-            loginText.style.transition = 'opacity 1.5s ease';
-            loginText.style.opacity = '1';
-            
-            await sleep(2500);
-            loginText.style.opacity = '0';
-            
-            await sleep(1000);
-            loginText.style.display = 'none';
-            
-            // 显示头像
-            avatarContainer.style.display = 'block';
-            await sleep(100);
-            avatarContainer.style.opacity = '1';
-            avatarContainer.style.transform = 'scale(1)';
-            
-            // 点击头像事件
-            avatarContainer.onclick = handleAvatarClick;
-        }
-        
-        async function handleAvatarClick(e) {
-            const avatarContainer = document.getElementById('avatar-container');
-            const successText = document.getElementById('success-text');
-            
-            avatarContainer.onclick = null; // 防止重复点击
-            
-            // 发光效果
-            avatarContainer.classList.add('glowing');
-            
-            // 波纹效果
-            createRipple(e.clientX, e.clientY);
-            
-            await sleep(1200);
-            
-            // 头像消失
-            avatarContainer.style.opacity = '0';
-            avatarContainer.style.transform = 'scale(0.5)';
-            
-            await sleep(600);
-            avatarContainer.style.display = 'none';
-            
-            // 显示成功文字
-            successText.style.transition = 'opacity 0.8s ease';
-            successText.style.opacity = '1';
-            
-            await sleep(1500);
-            successText.style.opacity = '0';
-            
-            await sleep(800);
-            
-            // 切换到主页
-            switchScene('main');
+        function switchScreen(from, to) {
+            return new Promise(resolve => {
+                screens[from].classList.add('fade-out');
+                setTimeout(() => {
+                    screens[from].classList.remove('active', 'fade-out');
+                    screens[to].classList.add('active');
+                    GameState.currentScreen = to;
+                    resolve();
+                }, 500);
+            });
         }
         
         function createRipple(x, y) {
@@ -1024,515 +1094,650 @@
             ripple.className = 'ripple';
             ripple.style.left = x + 'px';
             ripple.style.top = y + 'px';
-            ripple.style.width = '100px';
-            ripple.style.height = '100px';
-            ripple.style.marginLeft = '-50px';
-            ripple.style.marginTop = '-50px';
-            ripple.style.animation = 'rippleExpand 1.2s ease-out forwards';
+            ripple.style.marginLeft = '-150vmax';
+            ripple.style.marginTop = '-150vmax';
             document.body.appendChild(ripple);
-            
-            setTimeout(() => ripple.remove(), 1200);
+            setTimeout(() => ripple.remove(), 1500);
         }
         
-        // ===== 场景切换 =====
-        function switchScene(sceneName) {
-            const scenes = document.querySelectorAll('.scene');
-            scenes.forEach(scene => {
-                scene.classList.remove('active');
-                scene.style.opacity = '0';
-            });
+        function createConfetti() {
+            const container = $('confettiContainer');
+            const colors = ['#D8F878', '#FFCCB6', '#ff9a9e', '#fad0c4', '#a18cd1', '#fbc2eb', '#ffecd2', '#fcb69f', '#ff6b6b', '#4ecdc4'];
             
-            setTimeout(() => {
-                const newScene = document.getElementById(sceneName + '-scene');
-                if (newScene) {
-                    newScene.classList.add('active');
-                    setTimeout(() => {
-                        newScene.style.opacity = '1';
-                    }, 50);
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 12 + 6) + 'px';
+                    confetti.style.height = (Math.random() * 12 + 6) + 'px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                    container.appendChild(confetti);
                     
-                    // 初始化对应场景
-                    if (sceneName === 'main') initMainScene();
-                    else if (sceneName === 'story') initStoryScene('start');
-                    else if (sceneName === 'wechat') initWechatScene();
-                    else if (sceneName === 'ending') initEndingScene();
-                }
-            }, 300);
+                    setTimeout(() => confetti.remove(), 5500);
+                }, i * 30);
+            }
+        }
+        
+        // 震动效果（支持手机）
+        function vibrate(pattern) {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(pattern);
+            }
+        }
+        
+        // ==================== 预加载图片 ====================
+        async function preloadImages() {
+            const promises = Object.values(IMAGES).map(src => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = resolve;
+                    img.onerror = resolve; // 即使失败也继续
+                    img.src = src;
+                });
+            });
+            await Promise.all(promises);
+        }
+        
+        // ==================== 登录流程 ====================
+        async function initLogin() {
+            const loginText = $('loginText');
+            const avatarContainer = $('avatarContainer');
+            const loginSuccess = $('loginSuccess');
             
-            currentScene = sceneName;
+            // 显示"请登录"文字
+            await delay(500);
+            loginText.classList.add('typing');
+            
+            // 等待文字消失后显示头像
+            await delay(4000);
+            loginText.style.display = 'none';
+            avatarContainer.classList.add('visible');
+            
+            // 头像点击事件
+            avatarContainer.addEventListener('click', async function handleAvatarClick(e) {
+                avatarContainer.removeEventListener('click', handleAvatarClick);
+                playSound(sfxClick);
+                
+                // 创建波纹效果
+                const rect = avatarContainer.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                createRipple(x, y);
+                
+                // 头像发光
+                avatarContainer.classList.add('clicked');
+                
+                await delay(800);
+                avatarContainer.style.opacity = '0';
+                avatarContainer.style.transform = 'scale(0.5)';
+                
+                await delay(400);
+                loginSuccess.classList.add('show');
+                
+                await delay(1500);
+                await switchScreen('login', 'main');
+                initMain();
+            });
         }
         
-        // ===== 主页逻辑 =====
-        function initMainScene() {
-            const mainScene = document.getElementById('main-scene');
-            mainScene.onclick = () => {
-                mainScene.onclick = null;
-                switchScene('story');
-            };
+        // ==================== 主页流程 ====================
+        function initMain() {
+            const mainScreen = screens.main;
+            
+            mainScreen.addEventListener('click', async function handleMainClick() {
+                mainScreen.removeEventListener('click', handleMainClick);
+                playSound(sfxClick);
+                await switchScreen('main', 'story');
+                initStory();
+            });
         }
         
-        // ===== 故事页面逻辑 =====
-        let currentStoryPath = 'start';
+        // ==================== 故事系统 ====================
+        const storyData = {
+            // 开场
+            intro: [
+                { text: '你是付QQ，23英语2班的班长。', image: IMAGES.sleeping },
+                { text: 'AAA纯血正宗PPT大王AKA导员免费劳动力', image: IMAGES.sleeping },
+                { text: '现在是北京时间12月7日，早上8点20分\n你正在享受美好的周末', image: IMAGES.sleeping, particleOut: true },
+                { text: '一阵强劲的音乐袭来！', bold: true, shake: true, wipeImage: true },
+                { text: '是你的QQ电话响了呢，你决定', small: true },
+                {
+                    choices: [
+                        { text: 'A. 谁啊？接一下吧', branch: 'phone-answer' },
+                        { text: 'B. 都衮，没人能阻止我睡觉', branch: 'sleep' }
+                    ]
+                }
+            ],
+            
+            // 接电话分支
+            'phone-answer': [
+                { text: '「喂，老师。」', image: IMAGES.phoneCall },
+                { text: '手机传来你导员的声音' },
+                { text: '「付QQ你现在做一个优秀班集体的PPT，下午4点前给我。」' },
+                { text: '………什么玩意儿？做PPT？你' },
+                {
+                    choices: [
+                        { text: 'A. 怒了，拒绝', branch: 'angry' },
+                        { text: 'B. 已老实，一会儿就去做', branch: 'obey' }
+                    ]
+                }
+            ],
+            
+            // 睡觉分支 -> 结局
+            'sleep': [
+                { ending: 'hero-sleep' }
+            ],
+            
+            // 愤怒分支
+            'angry': [
+                { text: '大早上做什么PPT？你彻底怒了', image: IMAGES.angry },
+                { text: '往日种种在眼前浮现，你忍无可忍，速速动手' },
+                { bubble: '「你不会做PPT吗？自己搞啊」' },
+                { text: '手机传来导员低沉的声音：「付QQ你怎么和老师说话的？」' },
+                {
+                    choices: [
+                        { text: 'A. 我现在就这个态度，不爱听别听', branch: 'confront' },
+                        { text: 'B. 对不起老师我刚刚没睡醒', branch: 'obey' }
+                    ]
+                }
+            ],
+            
+            // 对抗分支
+            'confront': [
+                { text: '电话那头安静如鸡，随后是带着怒意的一声喊：「付QQ！」' },
+                { text: '你毫不示弱：「吼那么大声干嘛？现在是周末！我还在睡觉！」', image: IMAGES.powerful },
+                { text: '导员：「你是班长，要有奉献精神！」' },
+                {
+                    choices: [
+                        { text: 'A. 奉献精神？那你给我发工资了吗？', branch: 'salary' },
+                        { text: 'B. 这班长谁爱当谁当，我不干了！', branch: 'quit' }
+                    ]
+                }
+            ],
+            
+            // 要工资分支
+            'salary': [
+                { text: '「你给我工资了吗要求这么多？我白干这么久还没找你算账呢！」' },
+                { text: '导员：「你怎么这么计较」', image: IMAGES.stepping },
+                { text: '你乘胜追击：「计较？那我们现在就算算，我干了多少活，你该给我多少钱？」' },
+                { text: '导员：「好了，你先休息」' },
+                { text: '「啪！」你直接挂了电话。' },
+                { text: '怼得你神清气爽，也不多啰嗦。', image: IMAGES.victory },
+                { goto: 'wechat' }
+            ],
+            
+            // 不干了分支
+            'quit': [
+                { text: '「这班长谁爱当谁当！你现在就找别人，我立刻退出所有群！」' },
+                { text: '导员：「付QQ有话好好说」', image: IMAGES.stepping },
+                { text: '「没什么好说的，我受够了。再见。」' },
+                { text: '「啪！」你干脆利落地挂了电话。' },
+                { text: '怼得你神清气爽，也不多啰嗦。', image: IMAGES.victory },
+                { goto: 'wechat' }
+            ],
+            
+            // 老实分支
+            'obey': [
+                { text: '你叹了口气：「好的老师，我尽快做」' },
+                { text: '挂了电话，你打开电脑开始收集材料', image: IMAGES.computer },
+                { text: '中午煮了火鸡面，你边吃边做' },
+                { text: '下午3点发到老师邮箱' },
+                { text: '老师回复：\'下次要更主动些\'' },
+                { text: '你苦笑一下，关掉电脑', clearImage: true },
+                { text: '躺回床上休息' },
+                { text: '盯着天花板发呆...' },
+                { ending: 'reality' }
+            ]
+        };
         
-        function initStoryScene(path) {
-            currentStoryPath = path;
-            storyIndex = 0;
-            showStoryStep();
+        let currentStoryBranch = 'intro';
+        let currentStoryIndex = 0;
+        let storyClickable = false;
+        
+        async function initStory() {
+            currentStoryBranch = 'intro';
+            currentStoryIndex = 0;
+            await showStoryStep();
         }
         
         async function showStoryStep() {
-            const story = storyData[currentStoryPath];
-            if (!story || storyIndex >= story.length) return;
+            const data = storyData[currentStoryBranch];
+            if (!data || currentStoryIndex >= data.length) return;
             
-            const step = story[storyIndex];
-            const storyImage = document.getElementById('story-image');
-            const storyText = document.getElementById('story-text');
-            const choicesContainer = document.getElementById('choices-container');
-            const tapHint = document.getElementById('tap-hint');
-            const storyScene = document.getElementById('story-scene');
+            const step = data[currentStoryIndex];
+            const storyImage = $('storyImage');
+            const storyText = $('storyText');
+            const choicesContainer = $('choicesContainer');
+            const tapHint = $('tapHint');
+            const storyContainer = $('storyContainer');
             
-            canTap = false;
-            choicesContainer.style.display = 'none';
+            // 清理之前的状态
+            choicesContainer.innerHTML = '';
+            choicesContainer.classList.remove('visible');
+            storyClickable = false;
             tapHint.style.display = 'none';
             
-            // 处理跳转
-            if (step.goto) {
-                if (step.goto === 'wechat') {
-                    await sleep(500);
-                    switchScene('wechat');
-                    return;
-                } else if (step.goto === 'ending_reality') {
-                    currentPath.push('reality');
-                    await sleep(500);
-                    switchScene('ending');
-                    return;
-                } else if (step.goto === 'ending_sleep_final') {
-                    currentPath.push('sleep');
-                    await sleep(500);
-                    switchScene('ending');
-                    return;
-                } else {
-                    currentStoryPath = step.goto;
-                    storyIndex = 0;
-                    showStoryStep();
-                    return;
-                }
+            // 处理结局跳转
+            if (step.ending) {
+                GameState.endingType = step.ending;
+                await switchScreen('story', 'ending');
+                initEnding();
+                return;
+            }
+            
+            // 处理微信跳转
+            if (step.goto === 'wechat') {
+                await switchScreen('story', 'wechat');
+                initWechat();
+                return;
             }
             
             // 处理图片
             if (step.image) {
-                storyImage.src = getImageUrl(step.image);
+                storyImage.src = step.image;
+                storyImage.classList.remove('visible', 'wipe-out');
+                await delay(100);
                 storyImage.classList.add('visible');
             }
             
             if (step.wipeImage) {
                 storyImage.classList.add('wipe-out');
-                await sleep(600);
-                storyImage.classList.remove('visible', 'wipe-out');
-                storyImage.src = '';
+                await delay(800);
             }
             
             if (step.clearImage) {
                 storyImage.classList.remove('visible');
-                await sleep(300);
-                storyImage.src = '';
             }
             
-            // 处理震动
+            // 处理页面震动
             if (step.shake) {
-                storyScene.classList.add('shaking');
-                setTimeout(() => storyScene.classList.remove('shaking'), 500);
-            }
-            
-            // 处理文字样式
-            if (step.bold) {
-                storyText.classList.add('bold-large');
-            } else {
-                storyText.classList.remove('bold-large');
-            }
-            
-            // 处理选项
-            if (step.choices) {
-                await typeText(storyText, story[storyIndex - 1]?.text || '', false);
-                showChoices(step.choices);
-                return;
+                storyContainer.classList.add('shake');
+                vibrate([100, 50, 100, 50, 100]); // 手机震动
+                setTimeout(() => storyContainer.classList.remove('shake'), 600);
             }
             
             // 处理气泡
             if (step.bubble) {
-                await showBubble(step.bubble);
-                storyIndex++;
-                showStoryStep();
+                storyText.innerHTML = '';
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.textContent = step.bubble;
+                bubble.style.opacity = '0';
+                document.querySelector('.story-text-area').appendChild(bubble);
+                
+                await delay(100);
+                bubble.style.opacity = '1';
+                bubble.style.transition = 'opacity 0.5s ease';
+                
+                bubble.addEventListener('click', async () => {
+                    playSound(sfxClick);
+                    bubble.remove();
+                    currentStoryIndex++;
+                    await showStoryStep();
+                });
                 return;
             }
             
-            // 显示文字
+            // 处理文字
             if (step.text) {
-                await typeText(storyText, step.text, step.dissipate);
-            }
-            
-            // 显示点击提示
-            tapHint.style.display = 'block';
-            canTap = true;
-        }
-        
-        async function typeText(element, text, dissipate = false) {
-            isTyping = true;
-            element.innerHTML = '';
-            
-            const chars = text.split('');
-            for (let i = 0; i < chars.length; i++) {
-                const span = document.createElement('span');
-                span.className = 'char';
-                span.textContent = chars[i] === '\n' ? '' : chars[i];
-                if (chars[i] === '\n') {
-                    element.appendChild(document.createElement('br'));
+                storyText.textContent = step.text;
+                storyText.className = 'story-text';
+                
+                if (step.bold) {
+                    storyText.classList.add('bold-shake');
                 } else {
-                    element.appendChild(span);
+                    storyText.classList.add('expand-in');
                 }
                 
-                // 从中间向两边扩散的效果
-                const delay = Math.abs(i - chars.length / 2) * 30;
-                setTimeout(() => {
-                    span.style.animation = 'charFadeIn 0.3s ease forwards';
-                }, delay);
+                if (step.small) {
+                    storyText.style.fontSize = '1rem';
+                } else {
+                    storyText.style.fontSize = '';
+                }
+                
+                // 粒子消散效果
+                if (step.particleOut) {
+                    await delay(2500);
+                    storyText.classList.remove('expand-in');
+                    storyText.classList.add('particle-out');
+                    await delay(1000);
+                    currentStoryIndex++;
+                    await showStoryStep();
+                    return;
+                }
             }
             
-            await sleep(chars.length * 30 + 500);
-            isTyping = false;
-            
-            if (dissipate) {
-                await sleep(1500);
-                const spans = element.querySelectorAll('.char');
-                spans.forEach((span, i) => {
-                    setTimeout(() => {
-                        span.style.animation = 'charFadeOut 0.4s ease forwards';
-                    }, i * 20);
+            // 处理选项
+            if (step.choices) {
+                await delay(500);
+                step.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.className = 'choice-btn';
+                    btn.innerHTML = `<span>${choice.text}</span>`;
+                    btn.addEventListener('click', async () => {
+                        playSound(sfxClick);
+                        currentStoryBranch = choice.branch;
+                        currentStoryIndex = 0;
+                        
+                        storyText.classList.add('particle-out');
+                        choicesContainer.style.opacity = '0';
+                        await delay(500);
+                        
+                        await showStoryStep();
+                    });
+                    choicesContainer.appendChild(btn);
                 });
-                await sleep(spans.length * 20 + 400);
+                choicesContainer.classList.add('visible');
+                return;
             }
+            
+            // 普通文字点击继续
+            await delay(800);
+            tapHint.style.display = 'block';
+            storyClickable = true;
         }
         
-        function showChoices(choices) {
-            const container = document.getElementById('choices-container');
-            container.innerHTML = '';
-            container.style.display = 'flex';
-            
-            choices.forEach((choice, index) => {
-                const btn = document.createElement('button');
-                btn.className = `choice-btn ${index === 0 ? 'choice-a' : 'choice-b'}`;
-                btn.textContent = choice.text;
-                btn.style.opacity = '0';
-                btn.style.transform = 'translateY(20px)';
-                
-                setTimeout(() => {
-                    btn.style.transition = 'all 0.4s ease';
-                    btn.style.opacity = '1';
-                    btn.style.transform = 'translateY(0)';
-                }, index * 150);
-                
-                btn.onclick = () => {
-                    currentPath.push(choice.goto);
-                    currentStoryPath = choice.goto;
-                    storyIndex = 0;
-                    container.style.display = 'none';
-                    showStoryStep();
-                };
-                
-                container.appendChild(btn);
-            });
-        }
-        
-        async function showBubble(text) {
-            const storyText = document.getElementById('story-text');
-            storyText.innerHTML = '';
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            bubble.textContent = text;
-            bubble.style.opacity = '0';
-            bubble.style.transform = 'scale(0.9)';
-            storyText.appendChild(bubble);
-            
-            await sleep(100);
-            bubble.style.transition = 'all 0.4s ease';
-            bubble.style.opacity = '1';
-            bubble.style.transform = 'scale(1)';
-            
-            return new Promise(resolve => {
-                bubble.onclick = () => {
-                    bubble.style.opacity = '0';
-                    bubble.style.transform = 'scale(0.9)';
-                    setTimeout(resolve, 400);
-                };
-            });
-        }
-        
-        // 故事页面点击事件
-        document.getElementById('story-scene').addEventListener('click', (e) => {
-            if (!canTap || isTyping) return;
+        // 故事点击事件
+        $('storyContainer').addEventListener('click', async (e) => {
+            if (!storyClickable) return;
             if (e.target.closest('.choice-btn') || e.target.closest('.bubble')) return;
             
-            storyIndex++;
-            showStoryStep();
+            playSound(sfxClick);
+            storyClickable = false;
+            
+            const storyText = $('storyText');
+            storyText.classList.remove('expand-in', 'bold-shake');
+            storyText.classList.add('particle-out');
+            
+            await delay(500);
+            currentStoryIndex++;
+            await showStoryStep();
         });
         
-        // ===== 微信页面逻辑 =====
-        async function initWechatScene() {
-            const messagesContainer = document.getElementById('wechat-messages');
-            const choicesContainer = document.getElementById('wechat-choices');
+        // ==================== 微信系统 ====================
+        const wechatFlow = [
+            { from: 'left', text: '付QQ你怎么敢挂老师电话？' },
+            { from: 'left', text: '太不像话了！' },
+            {
+                choices: [
+                    { text: 'A. （继续输出）我就这样，怎么着？', branch: 'wechat-fight' },
+                    { text: 'B. （无视）已读不回', branch: 'wechat-ignore' }
+                ]
+            }
+        ];
+        
+        const wechatBranches = {
+            'wechat-fight': [
+                { from: 'right', text: '不像话的是你吧？周末早上八点打电话让人做PPT？' },
+                { from: 'right', text: '你自己怎么不做？就知道使唤学生？' },
+                { from: 'left', text: '你这样态度有问题，我要跟你家长谈谈！' },
+                { from: 'right', text: '谈啊，说我在学校被当免费劳动力' },
+                { from: 'right', text: '你打啊，现在就打' },
+                { system: '…………', delay: 3000 },
+                { system: '对方已撤回一条消息' },
+                { from: 'left', text: '算了，你冷静一下。PPT我找别人做。' },
+                { ending: 'hero-victory' }
+            ],
+            'wechat-ignore': [
+                { from: 'left', text: '？' },
+                { from: 'left', text: '付QQ，看到回复。' },
+                { system: '十分钟后' },
+                { from: 'left', text: '行，你厉害。PPT不用你做了。' },
+                { ending: 'hero-quiet' }
+            ]
+        };
+        
+        let wechatIndex = 0;
+        let currentWechatBranch = null;
+        
+        async function initWechat() {
+            const messagesContainer = $('wechatMessages');
+            const choicesContainer = $('wechatChoices');
             messagesContainer.innerHTML = '';
+            choicesContainer.innerHTML = '';
+            wechatIndex = 0;
+            currentWechatBranch = null;
             
-            // 显示初始消息
-            for (const msg of wechatData.initial) {
-                await addWechatMessage(msg);
-                await sleep(800);
-            }
-            
-            // 显示选项
-            await sleep(500);
-            showWechatChoices();
+            await showWechatStep();
         }
         
-        async function addWechatMessage(msg) {
-            const container = document.getElementById('wechat-messages');
+        async function showWechatStep() {
+            const flow = currentWechatBranch ? wechatBranches[currentWechatBranch] : wechatFlow;
+            if (wechatIndex >= flow.length) return;
             
-            if (msg.type === 'system') {
-                const div = document.createElement('div');
-                div.className = 'system-message';
-                div.textContent = msg.text;
-                div.style.animationDelay = '0.1s';
-                container.appendChild(div);
+            const step = flow[wechatIndex];
+            const messagesContainer = $('wechatMessages');
+            const choicesContainer = $('wechatChoices');
+            
+            // 处理结局
+            if (step.ending) {
+                await delay(1000);
+                GameState.endingType = step.ending;
+                await switchScreen('wechat', 'ending');
+                initEnding();
                 return;
             }
             
-            if (msg.type === 'wait') {
-                await sleep(msg.duration);
+            // 处理选项
+            if (step.choices) {
+                choicesContainer.innerHTML = '';
+                step.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.className = 'wechat-choice-btn';
+                    btn.textContent = choice.text;
+                    btn.addEventListener('click', async () => {
+                        playSound(sfxClick);
+                        choicesContainer.innerHTML = '';
+                        currentWechatBranch = choice.branch;
+                        wechatIndex = 0;
+                        await showWechatStep();
+                    });
+                    choicesContainer.appendChild(btn);
+                });
                 return;
             }
             
-            const row = document.createElement('div');
-            row.className = `message-row ${msg.sender === 'me' ? 'sent' : 'received'}`;
-            
-            const avatar = document.createElement('img');
-            avatar.className = 'message-avatar';
-            avatar.src = msg.sender === 'me' 
-                ? getImageUrl('fqq-avtar.jpg')
-                : getImageUrl('img-left.jpg');
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.textContent = msg.text;
-            
-            row.appendChild(avatar);
-            row.appendChild(bubble);
-            container.appendChild(row);
-            
-            // 滚动到底部
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        function showWechatChoices() {
-            const container = document.getElementById('wechat-choices');
-            container.innerHTML = '';
-            container.style.display = 'flex';
-            
-            const choices = [
-                { text: 'A. （继续输出）我就这样，怎么着？', action: 'A5' },
-                { text: 'B. （无视）已读不回', action: 'B5' }
-            ];
-            
-            choices.forEach((choice, index) => {
-                const btn = document.createElement('button');
-                btn.className = `choice-btn ${index === 0 ? 'choice-a' : 'choice-b'}`;
-                btn.textContent = choice.text;
-                btn.onclick = () => handleWechatChoice(choice.action);
-                container.appendChild(btn);
-            });
-        }
-        
-        async function handleWechatChoice(action) {
-            const choicesContainer = document.getElementById('wechat-choices');
-            choicesContainer.style.display = 'none';
-            
-            currentPath.push(action);
-            wechatChoice = action;
-            
-            const messages = action === 'A5' ? wechatData.choiceA5 : wechatData.choiceB5;
-            
-            for (const msg of messages) {
-                await addWechatMessage(msg);
-                if (msg.type === 'wait') {
-                    // wait类型已在addWechatMessage中处理
-                } else {
-                    await sleep(1200);
+            // 处理系统消息
+            if (step.system) {
+                if (step.delay) {
+                    await delay(step.delay);
                 }
+                const sysMsg = document.createElement('div');
+                sysMsg.className = 'system-message';
+                sysMsg.textContent = step.system;
+                messagesContainer.appendChild(sysMsg);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                await delay(800);
+                wechatIndex++;
+                await showWechatStep();
+                return;
             }
             
-            await sleep(2500);
-            currentPath.push('winner');
-            switchScene('ending');
+            // 处理消息
+            if (step.from) {
+                playSound(sfxMessage);
+                
+                const row = document.createElement('div');
+                row.className = `message-row ${step.from}`;
+                
+                const avatar = document.createElement('img');
+                avatar.className = 'msg-avatar';
+                avatar.src = step.from === 'left' ? IMAGES.avatarLeft : IMAGES.avatar;
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'msg-bubble';
+                bubble.textContent = step.text;
+                
+                row.appendChild(avatar);
+                row.appendChild(bubble);
+                messagesContainer.appendChild(row);
+                
+                await delay(100);
+                row.classList.add('visible');
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                await delay(800);
+                wechatIndex++;
+                await showWechatStep();
+            }
         }
         
-        // ===== 结局页面逻辑 =====
-        async function initEndingScene() {
-            const endingImage = document.getElementById('ending-image');
-            const endingText = document.getElementById('ending-text');
-            const birthdayTitle = document.getElementById('birthday-title');
-            const bgm = document.getElementById('bgm');
-            const endingScene = document.getElementById('ending-scene');
+        // ==================== 结局系统 ====================
+        const endingTexts = {
+            'hero-victory': [
+                '你猛地睁开眼睛。',
+                '阳光从窗帘缝隙洒进来，宿舍里安安静静。',
+                '原来……是一场梦啊。',
+                '但不得不说，骂得真爽。',
+                '虽然梦是假的，但爽是真的。',
+                '今天是12月7日——'
+            ],
+            'hero-quiet': [
+                '你猛地睁开眼睛。',
+                '阳光从窗帘缝隙洒进来，宿舍里安安静静。',
+                '原来……是一场梦啊。',
+                '但不得不说，不搭理他真爽。',
+                '虽然梦是假的，但爽是真的。',
+                '今天是12月7日——'
+            ],
+            'hero-sleep': [
+                '你舒服地翻了个身，沉沉睡去。',
+                '再次醒来，已经是中午。',
+                '阳光明媚，周末大好。',
+                '没有电话，没有PPT，只有惬意的休息。',
+                '今天是12月7日——'
+            ],
+            'reality': [
+                '你盯着熟悉的帘子。',
+                '手机安静地躺在枕边。',
+                '没有电话，没有PPT。',
+                '原来……是一场梦啊。',
+                '虽然在梦里也被CPU了，但那都是假的。',
+                '嘿，今天是你生日，开心一点吧。'
+            ]
+        };
+        
+        async function initEnding() {
+            const container = $('endingTextContainer');
+            const endingImage = $('endingImage');
+            const birthdayTitle = $('birthdayTitle');
+            const endingScreen = screens.ending;
             
-            endingImage.classList.remove('visible');
-            endingText.classList.remove('visible');
-            birthdayTitle.style.animation = 'none';
-            birthdayTitle.style.opacity = '0';
-            endingText.textContent = '';
+            container.innerHTML = '';
+            endingImage.classList.remove('pop-in');
+            birthdayTitle.classList.remove('celebrate');
+            endingImage.style.display = 'none';
             
-            // 黑屏渐亮
-            await sleep(1000);
+            const texts = endingTexts[GameState.endingType] || endingTexts['hero-victory'];
             
-            let texts = [];
+            // 黑屏渐亮效果
+            endingScreen.style.background = '#000';
+            await delay(1500);
+            endingScreen.style.transition = 'background 2s ease';
+            endingScreen.style.background = 'linear-gradient(180deg, #1a1a2e 0%, #2d2d44 100%)';
             
-            // 根据路径决定结局文本
-            if (currentPath.includes('ending_sleep')) {
-                // 睡觉结局 - B1分支
-                texts = [
-                    '你舒服地翻了个身，沉沉睡去。',
-                    '再次醒来，已经是中午。',
-                    '阳光明媚，周末大好。',
-                    '没有电话，没有PPT，只有惬意的休息。'
-                ];
-            } else if (currentPath.includes('reality') || currentPath.includes('path_b2')) {
-                // 现实结局 - B2/B3分支
-                endingImage.src = getImageUrl('躺在床上睁眼的付QQ.png');
-                endingImage.classList.add('visible');
-                await sleep(800);
-                
-                texts = [
-                    '你盯着熟悉的帘子。',
-                    '手机安静地躺在枕边。',
-                    '没有电话，没有PPT。',
-                    '原来……是一场梦啊。',
-                    '虽然在梦里也被CPU了，但那都是假的。'
-                ];
-            } else {
-                // 猛人胜利结局 - A线全通关
-                endingImage.src = getImageUrl('躺在床上睁眼的付QQ.png');
-                endingImage.classList.add('visible');
-                await sleep(800);
-                
-                texts = [
-                    '你猛地睁开眼睛。',
-                    '阳光从窗帘缝隙洒进来，宿舍里安安静静。',
-                    '原来……是一场梦啊。',
-                    '但不得不说，骂得真爽。'
-                ];
+            // 显示配图（猛人线显示睁眼图片，睡觉和现实线不显示）
+            if (['hero-victory', 'hero-quiet'].includes(GameState.endingType)) {
+                endingImage.src = IMAGES.wakeup;
+                endingImage.style.display = 'block';
+                await delay(500);
+                endingImage.classList.add('pop-in');
             }
+            
+            await delay(1000);
             
             // 逐行显示文字
             for (const text of texts) {
-                endingText.textContent = text;
-                endingText.classList.add('visible');
-                await sleep(2500);
-                endingText.classList.remove('visible');
-                await sleep(400);
+                const p = document.createElement('p');
+                p.className = 'ending-text';
+                p.textContent = text;
+                container.appendChild(p);
+                
+                await delay(100);
+                p.classList.add('fade-in');
+                await delay(2200);
             }
             
-            // 礼花效果
-            startConfetti();
+            // 显示生日祝福
+            await delay(1200);
+            
+            // 背景变成温暖的颜色
+            endingScreen.style.background = 'linear-gradient(180deg, #FFFBF8 0%, #FFCCB6 50%, #ffecd2 100%)';
             
             // 播放音乐
-            try {
-                bgm.volume = 0.6;
-                await bgm.play();
-            } catch(e) {
-                console.log('Audio autoplay blocked, user interaction required');
-            }
+            bgm.play().catch(() => {});
+            audioToggle.classList.add('visible');
             
-            // 最终祝福
-            await sleep(600);
+            // 礼花效果
+            createConfetti();
+            const confettiInterval = setInterval(createConfetti, 2500);
             
-            if (currentPath.includes('reality') || currentPath.includes('path_b2')) {
-                endingText.textContent = '嘿，今天是你生日，开心一点吧。';
-            } else {
-                endingText.textContent = '虽然梦是假的，但爽是真的。';
-            }
-            endingText.classList.add('visible');
+            // 清除之前的文字
+            await delay(500);
+            container.innerHTML = '';
             
-            await sleep(2500);
-            endingText.textContent = '今天是12月7日——';
+            // 显示生日图片
+            endingImage.src = IMAGES.birthday;
+            endingImage.style.display = 'block';
+            endingImage.classList.remove('pop-in');
+            await delay(100);
+            endingImage.classList.add('pop-in');
             
-            await sleep(2000);
+            await delay(600);
             
-            // 切换到生日祝福
-            endingText.classList.remove('visible');
-            await sleep(300);
-            
-            // 显示生日图片和标题
-            endingImage.src = getImageUrl('FQQHappyBirthday.png');
-            endingImage.classList.add('visible');
-            
-            await sleep(600);
+            // 显示生日标题
             birthdayTitle.textContent = '付QQ，生日快乐！！！';
-            birthdayTitle.style.animation = 'birthdayPop 0.8s ease forwards';
+            birthdayTitle.classList.add('celebrate');
             
-            // 延迟添加闪烁效果
-            setTimeout(() => {
-                birthdayTitle.classList.add('glowing');
-            }, 1000);
-            
-            // 添加点击播放音乐的提示（如果自动播放被阻止）
-            endingScene.onclick = () => {
-                try {
-                    bgm.play();
-                } catch(e) {}
-            };
+            // 添加副标题
+            await delay(1000);
+            const subtitle = document.createElement('p');
+            subtitle.className = 'ending-text';
+            subtitle.style.fontSize = '1rem';
+            subtitle.style.marginTop = '15px';
+            subtitle.textContent = '🎂 愿你天天开心，永远幸福 🎂';
+            container.appendChild(subtitle);
+            await delay(100);
+            subtitle.classList.add('fade-in');
         }
         
-        function startConfetti() {
-            const colors = ['#D8F878', '#FFCCB6', '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7', '#C7CEEA'];
+        // ==================== 音频控制 ====================
+        audioToggle.addEventListener('click', () => {
+            GameState.audioEnabled = !GameState.audioEnabled;
+            const icon = audioToggle.querySelector('i');
             
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.top = '-20px';
-                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
-                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
-                    confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
-                    document.body.appendChild(confetti);
-                    
-                    setTimeout(() => confetti.remove(), 5000);
-                }, i * 100);
+            if (GameState.audioEnabled) {
+                icon.className = 'fas fa-volume-up';
+                bgm.play().catch(() => {});
+            } else {
+                icon.className = 'fas fa-volume-mute';
+                bgm.pause();
             }
+        });
+        
+        // ==================== 初始化 ====================
+        async function init() {
+            // 预加载图片
+            await preloadImages();
             
-            // 持续礼花
-            setInterval(() => {
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(() => {
-                        const confetti = document.createElement('div');
-                        confetti.className = 'confetti';
-                        confetti.style.left = Math.random() * 100 + 'vw';
-                        confetti.style.top = '-20px';
-                        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                        confetti.style.width = (Math.random() * 10 + 5) + 'px';
-                        confetti.style.height = (Math.random() * 10 + 5) + 'px';
-                        confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
-                        document.body.appendChild(confetti);
-                        
-                        setTimeout(() => confetti.remove(), 5000);
-                    }, i * 200);
-                }
-            }, 2000);
+            // 隐藏加载动画
+            $('loading').classList.add('hidden');
+            
+            // 开始登录流程
+            initLogin();
         }
         
-        // ===== 初始化 =====
-        window.onload = () => {
-            initLogin();
-        };
+        // 页面加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
